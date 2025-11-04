@@ -30,13 +30,26 @@ At a planetary scale ( like with this sandbox-simulation ) the main force acting
 const SIUnitsString = `SI Units
 ----------
 SI is a french abbreviation for Système international d'unités, in english an international standard of units.`;
-const simulationTutorialString = `Pause Menu                        :  Escape
-Stop / Start Simulation           :  Spacebar
-Camera Movement                   :  w, a, s, d  /  ↑, ←, ↓, →
-Camera Zoom  (in / out)           :  scroll up   /  scroll down  (hold control for more precise scrolling input)
-Adjust time rate (faster, slower) :  scroll up   /  scroll down  (while mouse over time rate 'x0.000') (for now)
-Follow body                       :  f, type body name, enter
-Pan to body                       :  p, type body name, enter
-Create body info box              :  left click on body
-Create body change box            :  right click on body
-Create new body                   :  Control + Right click outside body`;
+const simulationTutorialString = `Controls 
+----------------------------------------------------------------------------------------------------------------------
+Simulation Controls
+-------------------
+Open                    Pause Menu      :  Escape
+Toggle   simulation     running         :  Spacebar
+Adjust   camera's       position        :  w, a, s, d  /  ↑, ←, ↓, →
+Adjust   camera's       Zoom            :  scroll up   /  scroll down  (hold control for more precise scrolling input)
+Adjust   simulation's   time rate       :  scroll up   /  scroll down  (while mouse over time rate 'x0.000') (for now)
+Follow   existing       body            :  f, type body name, enter
+Pan to   existing       body            :  p, type body name, enter
+Stop     following      body            :  f, enter
+Create   new            body info box   :  left click,  on body
+Create   new            body change box :  right click, cursor on body
+Move     existing       body info box   :  Control + left click + drag
+Move     existing       body change box :  Control + left click + drag
+Create   new            body            :  Control + Alt + Right click , cursor outside body
+Move     existing       body            :  Control + Left click + drag
+    
+Load simulation menu controls  
+-----------------------------
+View     Next / Prev    simulation      :  ←, →
+`;

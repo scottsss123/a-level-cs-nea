@@ -412,6 +412,7 @@ async function setCurrentSimulationByID(ID) {
     io.emit('setCurrentSimulation', outData);
 }
 
+//  send user's simulations' meta datas to the client
 async function updateSavedSimulationDescriptionBoxes(ID) {
     let simulationMetaDatas = await getSimulationMetaDatas();
     let userSimulationMetaDatas = [];
@@ -428,6 +429,7 @@ async function updateSavedSimulationDescriptionBoxes(ID) {
     io.emit('updateSavedSimulationDescriptionBoxes', userSimulationMetaDatas);
 }
 
+//  send public simulations' meta datas to the client
 async function updatePublicSimulationDescriptionBoxes() {
     let simulationMetaDatas = await getSimulationMetaDatas();
     let publicSimulationMetaDatas = [];

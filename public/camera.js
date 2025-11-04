@@ -16,7 +16,7 @@ class Camera {
         this.#pos[1] += displacement[1];
     }
     updateFocusOffset(displacement) { 
-        this.#focusOffset[0] += displacement[0]; // it not like this
+        this.#focusOffset[0] += displacement[0];
         this.#focusOffset[1] += displacement[1];
     }
     setPosition(newPos) {

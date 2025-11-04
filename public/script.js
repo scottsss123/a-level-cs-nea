@@ -48,6 +48,7 @@ let savedSimulationDescriptionBoxes = [];
 let publicSimulationDescriptionBoxes = [];
 
 let bodyImages = {};
+let loadSimulationIndex = 0;
 
 // executed before setup to load assets in more modular way
 function preload() {
@@ -192,9 +193,15 @@ function setup() {
 	    // load simulation menu buttons
 	    let loadSimulationButtons = [];
         let mySimulationsButton = new Button(mainMenuButtonX, (windowHeight / 2) - (1 * mainMenuButtonOffset), mainButtonWidth, mainButtonHeight, 'my simulations', states.indexOf('my simulations menu'));
-        mySimulationsButton.onPress = () => { socket.emit('updateSavedSimulationDescriptionBoxes', currentUserID)};
         let publicSimulationsButton = new Button(mainMenuButtonX, (windowHeight / 2) + (1 * mainMenuButtonOffset), mainButtonWidth, mainButtonHeight, 'public simulations', states.indexOf('public simulations menu'));
-        publicSimulationsButton.onPress = () => { socket.emit('updatePublicSimulationDescriptionBoxes')};
+        mySimulationsButton.onPress = () => { 
+            loadSimulationIndex = 0;
+            socket.emit('updateSavedSimulationDescriptionBoxes', currentUserID);
+        };
+        publicSimulationsButton.onPress = () => { 
+            loadSimulationIndex = 0;
+            socket.emit('updatePublicSimulationDescriptionBoxes');
+        };
         loadSimulationButtons.push(mySimulationsButton);
         loadSimulationButtons.push(publicSimulationsButton);
 	    loadSimulationButtons.push(new Button(mainMenuButtonX, (windowHeight / 2) + (3 * mainMenuButtonOffset), mainButtonWidth, mainButtonHeight, 'back', states.indexOf('pause menu')));
@@ -404,7 +411,7 @@ function setup() {
 	    //bodies.push(new Body("neptune", 1.02409e26, 4.9244e7, [4.5e12, 0],[0, 5.43e3], '#7CB7BB'));
 
         currentSimulation.getBodyByName('moon').setMinCanvasDiameter(0);
-        currentSimulation.getBodyByName('sun').setMinCanvasDiameter(20);
+        currentSimulation.getBodyByName('sun').setMinCanvasDiameter(8);
 //
         //currentSimulation.getCamera().setZoom(1 * (1/1.1) ** 11);
         //currentSimulation.getCamera().setPosition([0, 0]);
@@ -545,7 +552,11 @@ function update() {
         case 1:  // main simulation
             // handle held keys, for camera movement
             mainSimKeyHeldHandler();
-            // currently functionless
+            
+            if (currentlyDragging instanceof Body) {
+                currentlyDragging.setPos(currentSimulation.getCamera().getCursorSimPosition(mouseX,mouseY));
+            }
+
             currentSimulation.step();
 
             updateInfoPopupBoxes();
@@ -625,12 +636,11 @@ function loadSettings(settings) {
     updateUnitSettingsBoxes();
 }
 
-function updatePublicSimulationDescriptionBoxes(simulationMetaDatas) { /////////////////////////////////adjustable index so can load more than first 3 saved
+function updatePublicSimulationDescriptionBoxes(simulationMetaDatas) { 
     let i = 0;
-    console.log(simulationMetaDatas.length);
-    for (i; i < 3 && i < simulationMetaDatas.length; i++) {
-        console.log(i, simulationMetaDatas[i])
-        publicSimulationDescriptionBoxes[i].updateContents(simulationMetaDatas[i]);
+    //  populating the boxes with the first 3 public simulations' information
+    for (i; i < 3 && i + loadSimulationIndex < simulationMetaDatas.length; i++) {
+        publicSimulationDescriptionBoxes[i].updateContents(simulationMetaDatas[i + loadSimulationIndex]);
     }
     for (i; i < 3; i++) {
         publicSimulationDescriptionBoxes[i].updateContents(-1);
@@ -639,9 +649,9 @@ function updatePublicSimulationDescriptionBoxes(simulationMetaDatas) { /////////
 
 function updateSavedSimulationDescriptionBoxes(userSimulationMetaDatas) {
     let i = 0;
-    for (i; i < 3 && i < userSimulationMetaDatas.length; i++) {
-        console.log(i, userSimulationMetaDatas[i])
-        savedSimulationDescriptionBoxes[i].updateContents(userSimulationMetaDatas[i]);
+    //  populating the boxes with the first 3 public simulations' information
+    for (i; i < 3 && i + loadSimulationIndex < userSimulationMetaDatas.length; i++) {
+        savedSimulationDescriptionBoxes[i].updateContents(userSimulationMetaDatas[i + loadSimulationIndex]);
     }
     for (i; i < 3; i++) {
         savedSimulationDescriptionBoxes[i].updateContents(-1);
@@ -764,14 +774,14 @@ function savedSimulationDescriptionBoxPressed() {
             if (!contents || contents === "no simulation saved") {
                 return;
             }
+            
             let simulationID = box.getSimulationID();
-            console.log(simulationID);
             socket.emit('loadSimulationByID', simulationID);
         }
     }
 }
 
-function publicSimulationDescriptionBoxPressed() { ////////////////////////////////////////////////////////////
+function publicSimulationDescriptionBoxPressed() { 
     for (let box of publicSimulationDescriptionBoxes) {
         if (box.mouseOverlapping()) {
             let contents = box.getContents();
@@ -779,7 +789,6 @@ function publicSimulationDescriptionBoxPressed() { /////////////////////////////
                 return;
             }
             let simulationID = box.getSimulationID();
-            console.log(simulationID);
             socket.emit('loadSimulationByID', simulationID);
         }
     }
@@ -794,14 +803,34 @@ function mouseDragged() {
     }
 
     let pos = currentlyDragging.getPos();
-    currentlyDragging.setPos([pos[0] + (mouseX - pmouseX), pos[1] + (mouseY - pmouseY)]);
 
     if (currentlyDragging === updateBodyPopupBox) {
+        currentlyDragging.setPos([pos[0] + (mouseX - pmouseX), pos[1] + (mouseY - pmouseY)]);
         updateBodyPopupBox.updateLinePositions();
+    } else if (currentlyDragging instanceof BodyInfoPopupBox) {
+        currentlyDragging.setPos([pos[0] + (mouseX - pmouseX), pos[1] + (mouseY - pmouseY)]);
     }
 }
 
 function mousePressed(event) {
+    switch (state) {
+        case states.indexOf('my simulations menu'):
+            savedSimulationDescriptionBoxPressed();
+            break;
+        case states.indexOf('public simulations menu'):
+            publicSimulationDescriptionBoxPressed();
+            break;
+    }
+
+    if (!event.ctrlKey) return;
+
+    // if left mousebutton pressed while holding control, attach body to cursor
+    if (event.button === 0)
+    for (let body of currentSimulation.getBodies()) {
+        if (currentSimulation.getCamera().mouseOverlapsBody(body, [mouseX, mouseY])) {
+            currentlyDragging = body;
+        }
+    }
     // if mouse pressed while cursor overlaps popup box, set the currently dragging variable to overlapped popup box
     for (let popupBox of infoPopupBoxes) {
         if (popupBox.mouseOverlapping()) {
@@ -811,26 +840,12 @@ function mousePressed(event) {
     if (updateBodyPopupBox !== -1 && updateBodyPopupBox.mouseOverlapping()) {
         currentlyDragging = updateBodyPopupBox;
     }
-
-    switch (state) {
-        case states.indexOf('my simulations menu'):
-            savedSimulationDescriptionBoxPressed();
-            break;
-        case states.indexOf('public simulations menu'):
-            publicSimulationDescriptionBoxPressed();
-            break;
-    }
 }
 
 // q5 library function, run on mouse click
 function mouseReleased(event) {
     
     buttonsClicked();
-
-    // on control click logs click event
-    if (event.ctrlKey)
-        console.log(event);
-
 
     // maybe swap the order of this, state first then button check
     switch (event.button) {
@@ -848,12 +863,12 @@ function mouseReleased(event) {
                         break;
                     }
 
+                    if (event.ctrlKey) break;
+
                     // check for click on update body popup
                     // if clicked returns false, linked body is deleted
                     if (updateBodyPopupBox !== -1 && updateBodyPopupBox.mouseOverlapping()) {
-                        console.log(updateBodyPopupBox.clicked(mouseX,mouseY)); /////////////////////////////////////////////////log this bug fix
                         if (!updateBodyPopupBox.clicked(mouseX, mouseY)) {
-                            console.log(currentSimulation.getBodies().indexOf(updateBodyPopupBox.getLinkedBody()));
                             currentSimulation.getBodies().splice(currentSimulation.getBodies().indexOf(updateBodyPopupBox.getLinkedBody()), 1);
                         }
                         break;
@@ -875,7 +890,6 @@ function mouseReleased(event) {
                         updateBodyPopupBox = -1;
                     }
 
-                    currentlyDragging = -1;
                     break;
             }
         break;
@@ -885,25 +899,29 @@ function mouseReleased(event) {
                 case 0:
                     break;
                 case 1:
-                    // remove info popup box from popup boxes array on overlapping right click
-                    for (let i = infoPopupBoxes.length - 1; i >= 0; i--) {
-                        let popupBox = infoPopupBoxes[i];
-                        if (popupBox.mouseOverlapping()) {
-                            infoPopupBoxes.splice(i, 1);
-                            return;
-                        }
-                    }
                     // set updatebodypopup box variable to new popup box or reset if right click on body or not
                     let overlappingBody = false;
                     for (let body of currentSimulation.getBodies()) {
                         if (currentSimulation.getCamera().mouseOverlapsBody(body, [mouseX,mouseY])) {
                             updateBodyPopupBox = new UpdateBodyPopupBox(mouseX, mouseY, 400, 250, body, currentSimulation.getCamera(), displayMassUnit, displaySpeedUnit, displayDistanceUnit);
                             overlappingBody = true;
-                            return;
+                            break;
                         }
                     }
+
+                    if (!event.ctrlKey) break;
+
+                    // remove info popup box from popup boxes array on overlapping right click
+                    for (let i = infoPopupBoxes.length - 1; i >= 0; i--) {
+                        let popupBox = infoPopupBoxes[i];
+                        if (popupBox.mouseOverlapping()) {
+                            infoPopupBoxes.splice(i, 1);
+                            break;
+                        }
+                    }
+
                     // create new body if cursor doesn't overlap body and control key is held
-                    if (!overlappingBody && event.ctrlKey) {
+                    if (!overlappingBody && event.altKey) {
                         newBodyNumber++;
                         let newBodyName = 'body ' + newBodyNumber;
                         currentSimulation.addBody(new Body(newBodyName, currentSimulation.getCamera().getCursorSimPosition(mouseX,mouseY), [0,0], 0, 0, 0, [random(255), random(255), random(255)]));
@@ -914,15 +932,14 @@ function mouseReleased(event) {
             break;
     }
 
+    currentlyDragging = -1;
     switchSound.stop();
     switchSound.play();
 }
 // q5 library function, run once when any key pressed
 function keyPressed() {
         switch (state) {
-        case 0:  // main menu
-            break;
-        case 1:  // main simulation
+        case states.indexOf('main simulation'):  // main simulation
             switch (keyCode) {
                 case 27: // escape
                     state = states.indexOf('pause menu');
@@ -944,22 +961,24 @@ function keyPressed() {
                     currentSimulation.getCamera().setPosition(b.getPos());
             }
             break;
-        case 2:  // learn menu
-            break;
-        case 3:  // pause menu
+        case states.indexOf('pause menu'):  // pause menu
             if (keyCode === 27) { // escape
-                state = 1;
+                state = states.indexOf('main simulation');
             }
             break;
-        case 4:  // simulation tutorial menu
-            break;
-        case 5:  // physics info menu
-            break;
-        case 6:  // newtonian mechanics menu
-            break;
-        case 7:  // SI units menu
-            break;
-        default:
+        case states.indexOf('my simulations menu'):
+        case states.indexOf('public simulations menu'):
+            switch (keyCode) {
+                case 37:
+                    loadSimulationIndex = Math.max(0, loadSimulationIndex - 1);
+                    break;
+                case 39:
+                    loadSimulationIndex++;
+                    break;
+                }
+
+            socket.emit('updateSavedSimulationDescriptionBoxes', currentUserID);
+            socket.emit('updatePublicSimulationDescriptionBoxes');
             break;
     }
 }
@@ -993,6 +1012,14 @@ function drawCurrentSimBodies() {
         } else {
             let img = bodyImages[bodyImage];
             image(img, canvasPos[0], canvasPos[1], canvasDiameter, canvasDiameter);
+        }
+
+        if (currentlyDragging instanceof Body && currentlyDragging === body) {
+            noFill();
+            stroke (255, 255, 150);
+            strokeWeight(2);
+            circle (canvasPos[0], canvasPos[1], canvasDiameter + 6);
+            noStroke();
         }
     }
 
@@ -1053,25 +1080,25 @@ function drawCurrentSimToolbar() {
 function mainSimKeyHeldHandler() {
     
     if (keyIsDown('d') || keyIsDown(RIGHT_ARROW)) {
-        if (!currentSimulation.getFocus())
+        if (currentSimulation.getFocus())
             currentSimulation.getCamera().updateFocusOffset([3e8/70,0]);
         else
             currentSimulation.getCamera().updatePosition([3e8/70,0]);
     } 
     if (keyIsDown('a') || keyIsDown(LEFT_ARROW)) {
-        if (!currentSimulation.getFocus())
+        if (currentSimulation.getFocus())
             currentSimulation.getCamera().updateFocusOffset([-3e8/70,0]);
         else
             currentSimulation.getCamera().updatePosition([-3e8/70,0]);
     }
     if (keyIsDown('w') || keyIsDown(UP_ARROW)) {
-        if (!currentSimulation.getFocus())
+        if (currentSimulation.getFocus())
             currentSimulation.getCamera().updateFocusOffset([0,-3e8/70]);
         else
             currentSimulation.getCamera().updatePosition([0,-3e8/70]);
     }
     if (keyIsDown('s') || keyIsDown(DOWN_ARROW)) {
-        if (!currentSimulation.getFocus())
+        if (currentSimulation.getFocus())
             currentSimulation.getCamera().updateFocusOffset([0,3e8/70]);
         else
             currentSimulation.getCamera().updatePosition([0,3e8/70]);
@@ -1080,6 +1107,7 @@ function mainSimKeyHeldHandler() {
 
 let zoomInFactor = 1.1;
 let zoomOutFactor = 1 / 1.1;
+let signFlipThreshold = 0.01;
 // q5 library function, run on any scroll wheel event where parameter event is an object containing information about the event.
 function mouseWheel(event) {
     let zoomIn = true;
@@ -1094,15 +1122,34 @@ function mouseWheel(event) {
         downFactor = 1/1.01;
     }
 
+
     switch (state) {
         case 1:  // main simulation
+            let currentTimeRate = currentSimulation.getTimeRate();
             if (timeRateTextBox.mouseOverlapping()) { // tune & document
-                if (zoomIn) { // scroll down 
-                    currentSimulation.updateTimeRate(downFactor);
-                } else { // scroll up
-                    currentSimulation.updateTimeRate(upFactor);
+                if (currentTimeRate > 0) {
+                    if (zoomIn) { // scroll down 
+                        if (currentTimeRate < signFlipThreshold) {
+                            currentSimulation.setTimeRate(-1 * currentTimeRate);
+                            return;
+                        }
+                        currentSimulation.updateTimeRate(downFactor);
+                    } else { // scroll up
+                        currentSimulation.updateTimeRate(upFactor);
+                    }
+                    break;
+                } else {
+                    if (zoomIn) { // scroll down 
+                        currentSimulation.updateTimeRate(upFactor);
+                    } else { // scroll up
+                        if (currentTimeRate > -1 * signFlipThreshold) {
+                            currentSimulation.setTimeRate(-1 * currentTimeRate);
+                            return;
+                        }
+                        currentSimulation.updateTimeRate(downFactor);
+                    }
+                    break;
                 }
-                break;
             } 
             if (zoomIn) { // scroll down 
                 currentSimulation.getCamera().adjustZoom(downFactor);

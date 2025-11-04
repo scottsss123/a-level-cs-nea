@@ -40,8 +40,16 @@ class BodyInfoPopupBox extends TextBox {
         let pos = this.getPos();
         let bodyCanvasPos = this.#linkedCamera.getCanvasPosition(this.#linkedBody);
         stroke('white');
+        
+        strokeWeight(1);
         line(pos[0] , pos[1], bodyCanvasPos[0], bodyCanvasPos[1]);
 
+        if (this === currentlyDragging) {
+            strokeWeight(2);
+        } else {
+            noStroke();
+        }
+        
         // display textbox contents
         super.display();
 

@@ -91,7 +91,7 @@ class Simulation {
             return; 
         }
         let focusPos = this.#focus.getPos();
-        console.log(this.#focus);
+        // console.log(this.#focus);
         this.#camera.setPosition(focusPos);
     }
     getFocus() {
