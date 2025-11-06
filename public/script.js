@@ -24,6 +24,8 @@ let state = 0;
 let stateIndicator;
 // holds current simulation object
 let currentSimulation;
+// holds quick saved simulation
+let quickSavedSimulation;
 // icon variables
 let pauseIcon, playIcon, cameraIcon;
 let iconWidth = 32;
@@ -417,6 +419,9 @@ function setup() {
         //currentSimulation.getCamera().setPosition([0, 0]);
 
         //acurrentSimulation.setFocusByName('earth');
+
+        quickSavedSimulation = new Simulation();
+        quickSavedSimulation.setData(JSON.stringify(currentSimulation.getSimulationData()));
     }
 
     function initialiseIcons() {
@@ -959,6 +964,16 @@ function keyPressed() {
                     let b = currentSimulation.getBodyByName(prompt('enter body name to pan to'));
                     if (!b) break;
                     currentSimulation.getCamera().setPosition(b.getPos());
+                case 81: //q -> quick save
+                    quickSavedSimulation.setData(JSON.stringify(currentSimulation.getSimulationData()));
+                    break; 
+                case 76: //l -> quick load
+                    if (!quickSavedSimulation instanceof Simulation) {
+                        console.log(alert('no quick save!'));
+                        break;
+                    }
+                    currentSimulation.setData(JSON.stringify(quickSavedSimulation.getSimulationData()));
+                    break;
             }
             break;
         case states.indexOf('pause menu'):  // pause menu

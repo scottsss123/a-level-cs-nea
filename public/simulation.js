@@ -161,7 +161,7 @@ class Simulation {
             bodyArr.push(this.#bodies[i].getBodyData());
         }
         if (this.#focus) {
-            focus = this.#focus.getBodyData();
+            focus = this.#focus; ////////////////////////////////////////////////////////////////
         }
 
         return {
@@ -178,7 +178,6 @@ class Simulation {
 
     setData(simulationDataString) {
         let data = JSON.parse(simulationDataString);
-        console.log(data);
 
         this.#bodies = [];
         for (let i = 0; i < data.bodies.length; i++) {
@@ -190,11 +189,14 @@ class Simulation {
         if (data.focus === false) {
             this.#focus = false;
         } else {
-            this.#focus = new Body(data.focus.name, data.focus.pos, data.focus.vel, data.focus.mass, data.focus.diameter, data.focus.image, data.focus.colour );
+            this.#focus = this.getBodyByName(data.focus)
         }
         this.#prevTimeRate = data.prevTimeRate
         this.#time = data.time;
         this.#timeRate = data.timeRate;
         this.#id = data.id;
+
+        console.log(data.focus);
+
     }
 }
