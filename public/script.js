@@ -1126,7 +1126,14 @@ function mouseWheel(event) {
     switch (state) {
         case 1:  // main simulation
             let currentTimeRate = currentSimulation.getTimeRate();
-            if (timeRateTextBox.mouseOverlapping()) { // tune & document
+            if (timeRateTextBox.mouseOverlapping()) { 
+                if (currentTimeRate === 0) {
+                    if (zoomIn) {
+                        currentTimeRate = -1 * signFlipThreshold;
+                    } else {
+                        currentTimeRate = signFlipThreshold;
+                    }
+                }
                 if (currentTimeRate > 0) {
                     if (zoomIn) { // scroll down 
                         if (currentTimeRate < signFlipThreshold) {
