@@ -8,6 +8,9 @@ class Simulation {
     #focus; // bool / string
     #id;
 
+    #//relative centre pos / body
+
+
     constructor() {
         this.#camera = new Camera([0,0], 1);
         this.#bodies = [];
@@ -160,8 +163,11 @@ class Simulation {
         for (let i = 0; i < this.#bodies.length; i++) {
             bodyArr.push(this.#bodies[i].getBodyData());
         }
-        if (this.#focus) {
-            focus = this.#focus; ////////////////////////////////////////////////////////////////
+
+        if (this.#focus instanceof Body) {
+            focus = this.#focus.getBodyData();
+        } else {
+            focus = false;
         }
 
         return {
@@ -182,21 +188,17 @@ class Simulation {
         this.#bodies = [];
         for (let i = 0; i < data.bodies.length; i++) {
             let body = data.bodies[i]
-            ////////////////////////////////////////////img
             this.#bodies[i] = new Body(body.name, body.pos, body.vel, body.mass, body.diameter, body.image, body.colour );
         }
         this.#camera.setData(data.camera);
-        if (data.focus === false) {
+        if (!data.focus) {
             this.#focus = false;
         } else {
-            this.#focus = this.getBodyByName(data.focus)
+            this.#focus = this.getBodyByName(data.focus.name);
         }
         this.#prevTimeRate = data.prevTimeRate
         this.#time = data.time;
         this.#timeRate = data.timeRate;
         this.#id = data.id;
-
-        console.log(data.focus);
-
     }
 }

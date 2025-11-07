@@ -968,10 +968,6 @@ function keyPressed() {
                     quickSavedSimulation.setData(JSON.stringify(currentSimulation.getSimulationData()));
                     break; 
                 case 76: //l -> quick load
-                    if (!quickSavedSimulation instanceof Simulation) {
-                        console.log(alert('no quick save!'));
-                        break;
-                    }
                     currentSimulation.setData(JSON.stringify(quickSavedSimulation.getSimulationData()));
                     break;
             }

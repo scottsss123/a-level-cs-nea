@@ -34,6 +34,7 @@ function connected(socket) {
     socket.on('logdata', (data) => {
         console.log(data);
     })
+
     socket.on('insertSimulation', (data) => { insertSimulation(data); });
     socket.on('saveSettings', (data) => { saveSettings(data); });
     socket.on('loadSettings', (data) => { loadSettings(data); });
