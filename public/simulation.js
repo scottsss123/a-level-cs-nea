@@ -7,9 +7,7 @@ class Simulation {
     #G; // gravitational constant float
     #focus; // bool / string
     #id;
-
-    #//relative centre pos / body
-
+    #relativeCentre;
 
     constructor() {
         this.#camera = new Camera([0,0], 1);
@@ -34,6 +32,9 @@ class Simulation {
     getTimeRate() {
         return this.#timeRate;
     }
+    getRelativeCentre() {
+        return this.#relativeCentre;
+    }
 
     setTime(inTime) {
         this.#time = inTime;
@@ -51,6 +52,9 @@ class Simulation {
             console.log('no body of given name - setFocusByName');
             this.#focus = false;
         }
+    }
+    setRelativeCentre(inRelativeCentre) {
+        this.#relativeCentre = inRelativeCentre;
     }
 
     updateTime() {

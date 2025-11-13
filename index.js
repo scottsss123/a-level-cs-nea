@@ -4,6 +4,7 @@ var express = require('express');
 var socket = require('socket.io');
 const { emit } = require('process');
 const { resolve } = require('path');
+const { fileURLToPath } = require('url');
 
 const db = new sqlite3.Database('spaceSimulationDB.db');
 

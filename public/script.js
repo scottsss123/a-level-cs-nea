@@ -970,6 +970,18 @@ function keyPressed() {
                 case 76: //l -> quick load
                     currentSimulation.setData(JSON.stringify(quickSavedSimulation.getSimulationData()));
                     break;
+                case 82: //r -> set relative position
+                    let cursorOverlapsBody = false;
+                    for (body of currentSimulation.getBodies()) {
+                        if (currentSimulation.getCamera().mouseOverlapsBody(body, [mouseX,mouseY])) {
+                            currentSimulation.setRelativeCentre(body);
+                            cursorOverlapsBody = true;
+                        }
+                    }
+                    if (!cursorOverlapsBody) {
+                        currentSimulation.setRelativeCentre(undefined);
+                    }
+                    break;
             }
             break;
         case states.indexOf('pause menu'):  // pause menu
@@ -1070,8 +1082,10 @@ function getAverageFrameRate() {
 function drawCurrentSimToolbar() {
     let simTime = currentSimulation.getTime();
     let simTimeRate = currentSimulation.getTimeRate();
+    let relativeCentre = currentSimulation.getRelativeCentre();
     let camera = currentSimulation.getCamera();
     let cameraPos = camera.getPos();
+    let displayCameraPos = [cameraPos[0], cameraPos[1]]
     let cameraZoom = camera.getZoom();
 
     // remove first frameRate in array, and shift all others down one index
@@ -1080,12 +1094,22 @@ function drawCurrentSimToolbar() {
     prevFrameRates.push(frameRate());
     let averageFrameRate = getAverageFrameRate();
 
+    if (relativeCentre instanceof Body) {
+        let relativeCentrePos = relativeCentre.getPos();
+        displayCameraPos[0] = displayCameraPos[0] - relativeCentrePos[0];
+        displayCameraPos[1] = displayCameraPos[1] - relativeCentrePos[1];;
+    } else if (relativeCentre) {
+        displayCameraPos[0] = displayCameraPos[0] - relativeCentre[0];
+        displayCameraPos[1] = displayCameraPos[1] - relativeCentre[1];
+    }
+
     drawToolbar();
     drawToolbarIcons();
     timeRateTextBox.updateContents("x"+(simTimeRate * averageFrameRate).toPrecision(3));
     timeTextBox.updateContents(secondsToDisplayTime(simTime)); 
     camZoomTextBox.updateContents("x"+cameraZoom.toPrecision(3));
-    camPosTextBox.updateContents("( " + cameraPos[0].toPrecision(3) + " , " + cameraPos[1].toPrecision(3) + " )");
+    camPosTextBox.updateContents("( " + displayCameraPos[0].toPrecision(3) + " (m) , " + displayCameraPos[1].toPrecision(3) + "(m) ) ( mod (m), arg (°) )");
+    // ^ add mod arg display for ux & update units alongside the settings
 }
 
 function mainSimKeyHeldHandler() {
