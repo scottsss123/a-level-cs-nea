@@ -367,11 +367,11 @@ function setup() {
         // intialising main simulation info display text boxes
         timeRateTextBox = new TextBox(3 * iconWidth, height - (mainButtonHeight/2) -( 0.5 * textLeading()), width/4, mainButtonHeight / 4, '');
         timeRateTextBox.toggleDisplayBox();
-        timeTextBox = new TextBox(8*iconWidth, height- (mainButtonHeight/2) -( 0.5 * textLeading()), width/4, mainButtonHeight / 4, '');
+        timeTextBox = new TextBox(8*iconWidth, height- (mainButtonHeight/2) -( 0.5 * textLeading()), width/2, mainButtonHeight / 4, '');
         timeTextBox.toggleDisplayBox();
-        camZoomTextBox = new TextBox(3 * width / 5 + 2 * iconWidth, height- (mainButtonHeight/2) -( 0.5 * textLeading()), width/4, mainButtonHeight/4, '');
+        camZoomTextBox = new TextBox(1 * width / 2 + 2 * iconWidth, height- (mainButtonHeight/2) -( 0.5 * textLeading()), width/2, mainButtonHeight/4, '');
         camZoomTextBox.toggleDisplayBox();
-        camPosTextBox = new TextBox(3 * width / 5 + 4 * iconWidth, height - (mainButtonHeight /2) - (0.5* textLeading()), width/4, mainButtonHeight/4, '');
+        camPosTextBox = new TextBox(1 * width / 2 + 5 * iconWidth, height - (mainButtonHeight /2) - (0.5* textLeading()), width/2, mainButtonHeight/4, '');
         camPosTextBox.toggleDisplayBox();
         let mainSimulationTextBoxes = [timeRateTextBox, timeTextBox, camZoomTextBox, camPosTextBox];
     
@@ -431,7 +431,7 @@ function setup() {
 
         pauseIcon = new Icon(iconWidth, toolbarIconHeight, iconWidth, iconHeight, pauseIconImage);
         playIcon = new Icon(iconWidth * 2, toolbarIconHeight, iconWidth, iconHeight, playIconImage);
-        cameraIcon = new Icon(3 * width / 5 + iconWidth, toolbarIconHeight, iconWidth, iconHeight, cameraIconImage);
+        cameraIcon = new Icon(1 * width / 2 + iconWidth, toolbarIconHeight, iconWidth, iconHeight, cameraIconImage);
 
 
         icons[states.indexOf('main simulation')] = [pauseIcon, playIcon, cameraIcon];
@@ -561,6 +561,7 @@ function update() {
             mainSimKeyHeldHandler();
             
             if (currentlyDragging instanceof Body) {
+                console.log(dragOffset);
                 currentlyDragging.setPos(currentSimulation.getCamera().getCursorSimPosition(mouseX - dragOffset[0],mouseY - dragOffset[1]));
             } else if (currentlyDragging instanceof BodyInfoPopupBox || currentlyDragging instanceof UpdateBodyPopupBox) {
                 currentlyDragging.setPos([mouseX - dragOffset[0], mouseY - dragOffset[1]]);
@@ -816,7 +817,8 @@ function mouseDragged() {
 
 // set dragOffset according to currentlyDragging position and mousePositions
 function setDragOffset(mX, mY) {
-    dragOffset = [mX - currentlyDragging.getPos()[0], mY - currentlyDragging.getPos()[1]];
+    let currentlyDraggingPos = currentlyDragging.getPos();
+    dragOffset = [mX - currentlyDraggingPos[0], mY - currentlyDraggingPos[1]];
 }
 
 function mousePressed(event) {
@@ -831,15 +833,15 @@ function mousePressed(event) {
 
     if (!event.ctrlKey) return;
 
-    // if left mousebutton pressed while holding control, attach body to cursor
+    // if left mousebutton pressed while holding control, attach body to cursor ////////////////////////////////////////////////LOG THIS DRAG FIX
     if (event.button === 0)
     for (let body of currentSimulation.getBodies()) {
         if (currentSimulation.getCamera().mouseOverlapsBody(body, [mouseX, mouseY])) {
             currentlyDragging = body;
+            
             let bodyCanvasPosition = currentSimulation.getCamera().getCanvasPosition(body);
-            let cursorSimPosition = currentSimulation.getCamera().getCursorSimPosition(mouseX - bodyCanvasPosition[0], mouseY - bodyCanvasPosition[1]); ////////////////////////////////fix dragging!
-            setDragOffset(cursorSimPosition[0], cursorSimPosition[1]);
-            dragOffset = currentSimulation.getCamera().getSimPointCanvasPosition(dragOffset[0], dragOffset[1]);
+            dragOffset[0] = mouseX - bodyCanvasPosition[0];
+            dragOffset[1] = mouseY - bodyCanvasPosition[1];
         }
     }
     // if mouse pressed while cursor overlaps popup box, set the currently dragging variable to overlapped popup box
@@ -1124,13 +1126,14 @@ function drawCurrentSimToolbar() {
     }
 
     let modPos = Math.sqrt(displayCameraPos[0]**2 + displayCameraPos[1]**2);
+    let argPos = -(Math.atan2(displayCameraPos[1], displayCameraPos[0]) * 180 / Math.PI).toPrecision(3);
 
     drawToolbar();
     drawToolbarIcons();
     timeRateTextBox.updateContents("x"+(simTimeRate * averageFrameRate).toPrecision(3));
     timeTextBox.updateContents(secondsToDisplayTime(simTime)); 
     camZoomTextBox.updateContents("x"+cameraZoom.toPrecision(3));
-    camPosTextBox.updateContents("( " + displayCameraPos[0].toPrecision(3) + " (m) , " + displayCameraPos[1].toPrecision(3) + "(m) ) ( " + modPos + " (m), arg (°) )");
+    camPosTextBox.updateContents("( " + displayCameraPos[0].toPrecision(3) + " (m) , " + displayCameraPos[1].toPrecision(3) + "(m) ) ( " + modPos.toPrecision(3) + " (m), " + argPos.toPrecision(3) + " (°) )");
     // ^ add mod arg display for ux & update units alongside the settings
 }
 
