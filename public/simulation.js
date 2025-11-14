@@ -1,12 +1,14 @@
 class Simulation {
-    #bodies // array of body objects
-    #camera // camera object
+    #bodies; // array of body objects
+    #camera; // camera object
     #time;  // float
     #timeRate;  // float
     #prevTimeRate; // float
     #G; // gravitational constant float
     #focus; // bool / string
     #id;
+
+    #prevBodyPositions; ///////////////////////////////////////////////////////////////// draw prev paths :)
 
     constructor() {
         this.#camera = new Camera([0,0], 1);
@@ -16,6 +18,7 @@ class Simulation {
         this.#prevTimeRate = 1/60 * 1000;
         this.#G = 6.67430e-11;
         this.#focus = false;
+        this.#prevBodyPositions = [];
     }
 
 
