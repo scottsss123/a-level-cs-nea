@@ -3,6 +3,7 @@ class Camera {
     #zoom;
     #scaleFactor;
     #focusOffset;
+    #relativeCentre;
 
     constructor(inPos, inZoom) {
         this.#pos = inPos;
@@ -26,6 +27,10 @@ class Camera {
     setZoom(inZoom) {
         this.#zoom = inZoom;
     }
+    setRelativeCentre(inRelativeCentre) {
+        this.#relativeCentre = inRelativeCentre;
+    }
+    
     adjustZoom(sf) {
         this.#zoom = sf * this.#zoom;
     }
@@ -35,6 +40,11 @@ class Camera {
         // calculate body x,y on canvas relative to camera position and zoom
         let canvasX = ((bodyPos[0] - this.#pos[0] - this.#focusOffset[0]) * this.#scaleFactor * this.#zoom) + (width / 2);
         let canvasY = ((bodyPos[1] - this.#pos[1] - this.#focusOffset[1]) * this.#scaleFactor * this.#zoom) + (height / 2);
+        return [canvasX, canvasY]; 
+    }
+    getSimPointCanvasPosition(x, y) {
+        let canvasX = ((x - this.#pos[0] - this.#focusOffset[0]) * this.#scaleFactor * this.#zoom) + (width / 2);
+        let canvasY = ((y - this.#pos[1] - this.#focusOffset[1]) * this.#scaleFactor * this.#zoom) + (height / 2);
         return [canvasX, canvasY]; 
     }
     getCursorSimPosition(x,y) { // mouseX, mouseY
@@ -57,6 +67,9 @@ class Camera {
     }
     getScaleFactor() {
         return this.#scaleFactor;
+    }
+    getRelativeCentre() {
+        return this.#relativeCentre;
     }
 
     mouseOverlapsBody(body, mousePosition) {

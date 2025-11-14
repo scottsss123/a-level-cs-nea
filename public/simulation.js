@@ -7,7 +7,6 @@ class Simulation {
     #G; // gravitational constant float
     #focus; // bool / string
     #id;
-    #relativeCentre;
 
     constructor() {
         this.#camera = new Camera([0,0], 1);
@@ -32,9 +31,6 @@ class Simulation {
     getTimeRate() {
         return this.#timeRate;
     }
-    getRelativeCentre() {
-        return this.#relativeCentre;
-    }
 
     setTime(inTime) {
         this.#time = inTime;
@@ -53,9 +49,7 @@ class Simulation {
             this.#focus = false;
         }
     }
-    setRelativeCentre(inRelativeCentre) {
-        this.#relativeCentre = inRelativeCentre;
-    }
+    
 
     updateTime() {
         this.#time += this.#timeRate;

@@ -59,15 +59,28 @@ class BodyInfoPopupBox extends TextBox {
 
     /// TODO: convert units & maybe comment more in doc
     updateBodyInfo() {
+        let relativeCentre = this.#linkedCamera.getRelativeCentre();
+
         // stores linked body's attributes
+        // not relative to simulation centre
         let bodyName = this.#linkedBody.getName();
+        let bodyDiameter = (this.#linkedBody.getDiameter() * distanceUnits[this.#displayDistanceUnit]).toPrecision(3);
+        let bodyMass = (this.#linkedBody.getMass() *  massUnits[this.#displayMassUnit]).toPrecision(3);
+
+        // relative to simulation centre
         let bodyPosition = this.#linkedBody.getPos();
         let bodyVelocity = this.#linkedBody.getVel();
+
+        if (relativeCentre instanceof Body) {
+            let relativeCentrePos = relativeCentre.getPos();
+            bodyPosition = [bodyPosition[0] - relativeCentrePos[0], bodyPosition[1] - relativeCentrePos[1]];
+            let relativeCentreVelocity = relativeCentre.getVel();
+            bodyVelocity = [bodyVelocity[0] - relativeCentreVelocity[0], bodyVelocity[1] - relativeCentreVelocity[1]];
+        }
+
         let bodyVelocityMagnitude = (Math.sqrt((bodyVelocity[0])**2 + (bodyVelocity[1])**2) * speedUnits[this.#displaySpeedUnit]).toPrecision(3);
         // calculate angle of body's velocity currently standard angle, could change to bearing 
         let bodyVelocityDirection = -(Math.atan2(bodyVelocity[1], bodyVelocity[0]) * 180 / Math.PI).toPrecision(3)
-        let bodyDiameter = (this.#linkedBody.getDiameter() * distanceUnits[this.#displayDistanceUnit]).toPrecision(3);
-        let bodyMass = (this.#linkedBody.getMass() *  massUnits[this.#displayMassUnit]).toPrecision(3);
 
         let newContents = "Body Name: " + bodyName + "\n \nBody Position (x, y):\n" + (bodyPosition[0] * distanceUnits[this.#displayDistanceUnit]).toPrecision(3) + " " + this.#displayDistanceUnit + ", " + (bodyPosition[1] * distanceUnits[this.#displayDistanceUnit]).toPrecision(3) + " " + this.#displayDistanceUnit + "\nBody mass: " + bodyMass + " " + this.#displayMassUnit + "\nBody diameter: " + bodyDiameter + " " + this.#displayDistanceUnit + "\nBody velocity: " + bodyVelocityMagnitude + " " + displaySpeedUnit + "\nBody direection: " + bodyVelocityDirection + '°';
         // updates text contents with updated attributes

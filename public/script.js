@@ -52,6 +52,8 @@ let publicSimulationDescriptionBoxes = [];
 let bodyImages = {};
 let loadSimulationIndex = 0;
 
+let dragOffset = [0,0];
+
 // executed before setup to load assets in more modular way
 function preload() {
     loadFont("./assets/monoMMM_5.ttf");
@@ -559,7 +561,9 @@ function update() {
             mainSimKeyHeldHandler();
             
             if (currentlyDragging instanceof Body) {
-                currentlyDragging.setPos(currentSimulation.getCamera().getCursorSimPosition(mouseX,mouseY));
+                currentlyDragging.setPos(currentSimulation.getCamera().getCursorSimPosition(mouseX - dragOffset[0],mouseY - dragOffset[1]));
+            } else if (currentlyDragging instanceof BodyInfoPopupBox || currentlyDragging instanceof UpdateBodyPopupBox) {
+                currentlyDragging.setPos([mouseX - dragOffset[0], mouseY - dragOffset[1]]);
             }
 
             currentSimulation.step();
@@ -799,22 +803,20 @@ function publicSimulationDescriptionBoxPressed() {
     }
 }
 
-
-// can now drag things, may be useful
 function mouseDragged() {
     // move popup box if mouse is dragged and initially pressed over popup box
     if (currentlyDragging === -1) {
         return;
     }
 
-    let pos = currentlyDragging.getPos();
-
     if (currentlyDragging === updateBodyPopupBox) {
-        currentlyDragging.setPos([pos[0] + (mouseX - pmouseX), pos[1] + (mouseY - pmouseY)]);
         updateBodyPopupBox.updateLinePositions();
-    } else if (currentlyDragging instanceof BodyInfoPopupBox) {
-        currentlyDragging.setPos([pos[0] + (mouseX - pmouseX), pos[1] + (mouseY - pmouseY)]);
     }
+}
+
+// set dragOffset according to currentlyDragging position and mousePositions
+function setDragOffset(mX, mY) {
+    dragOffset = [mX - currentlyDragging.getPos()[0], mY - currentlyDragging.getPos()[1]];
 }
 
 function mousePressed(event) {
@@ -834,16 +836,22 @@ function mousePressed(event) {
     for (let body of currentSimulation.getBodies()) {
         if (currentSimulation.getCamera().mouseOverlapsBody(body, [mouseX, mouseY])) {
             currentlyDragging = body;
+            let bodyCanvasPosition = currentSimulation.getCamera().getCanvasPosition(body);
+            let cursorSimPosition = currentSimulation.getCamera().getCursorSimPosition(mouseX - bodyCanvasPosition[0], mouseY - bodyCanvasPosition[1]); ////////////////////////////////fix dragging!
+            setDragOffset(cursorSimPosition[0], cursorSimPosition[1]);
+            dragOffset = currentSimulation.getCamera().getSimPointCanvasPosition(dragOffset[0], dragOffset[1]);
         }
     }
     // if mouse pressed while cursor overlaps popup box, set the currently dragging variable to overlapped popup box
     for (let popupBox of infoPopupBoxes) {
         if (popupBox.mouseOverlapping()) {
             currentlyDragging = popupBox;
+            setDragOffset(mouseX, mouseY);
         }
     }
     if (updateBodyPopupBox !== -1 && updateBodyPopupBox.mouseOverlapping()) {
         currentlyDragging = updateBodyPopupBox;
+        setDragOffset(mouseX, mouseY);
     }
 }
 
@@ -925,12 +933,20 @@ function mouseReleased(event) {
                         }
                     }
 
-                    // create new body if cursor doesn't overlap body and control key is held
+                    // create new body if cursor doesn't overlap body and control and alt keys are held
                     if (!overlappingBody && event.altKey) {
                         newBodyNumber++;
                         let newBodyName = 'body ' + newBodyNumber;
-                        currentSimulation.addBody(new Body(newBodyName, currentSimulation.getCamera().getCursorSimPosition(mouseX,mouseY), [0,0], 0, 0, 0, [random(255), random(255), random(255)]));
+                        currentSimulation.addBody(new Body(newBodyName, currentSimulation.getCamera().getCursorSimPosition(mouseX,mouseY), [0,0], 0, 0, 'none', [random(255), random(255), random(255)]));
                         updateBodyPopupBox = new UpdateBodyPopupBox(mouseX, mouseY, 400, 250, currentSimulation.getBodyByName(newBodyName), currentSimulation.getCamera(), displayMassUnit, displaySpeedUnit, displayDistanceUnit);
+                        
+                        let relativeCentre = currentSimulation.getCamera().getRelativeCentre();
+                        if (relativeCentre instanceof Body) {
+                            let relativeCentreVelocity = relativeCentre.getVel();
+                            let newBody = currentSimulation.getBodies().at(-1);
+                            newBody.setVel(relativeCentreVelocity);
+                            newBody.setMinCanvasDiameter(0);
+                        }
                     }
             }
 
@@ -938,6 +954,7 @@ function mouseReleased(event) {
     }
 
     currentlyDragging = -1;
+    dragOffset = [0,0];
     switchSound.stop();
     switchSound.play();
 }
@@ -969,17 +986,20 @@ function keyPressed() {
                     break; 
                 case 76: //l -> quick load
                     currentSimulation.setData(JSON.stringify(quickSavedSimulation.getSimulationData()));
+                    infoPopupBoxes = [];
+                    updateBodyPopupBox = -1;
                     break;
                 case 82: //r -> set relative position
                     let cursorOverlapsBody = false;
+                    let camera = currentSimulation.getCamera();
                     for (body of currentSimulation.getBodies()) {
-                        if (currentSimulation.getCamera().mouseOverlapsBody(body, [mouseX,mouseY])) {
-                            currentSimulation.setRelativeCentre(body);
+                        if (camera.mouseOverlapsBody(body, [mouseX,mouseY])) {
+                            camera.setRelativeCentre(body);
                             cursorOverlapsBody = true;
                         }
                     }
                     if (!cursorOverlapsBody) {
-                        currentSimulation.setRelativeCentre(undefined);
+                        camera.setRelativeCentre(undefined);
                     }
                     break;
             }
@@ -1082,8 +1102,8 @@ function getAverageFrameRate() {
 function drawCurrentSimToolbar() {
     let simTime = currentSimulation.getTime();
     let simTimeRate = currentSimulation.getTimeRate();
-    let relativeCentre = currentSimulation.getRelativeCentre();
     let camera = currentSimulation.getCamera();
+    let relativeCentre = camera.getRelativeCentre();
     let cameraPos = camera.getPos();
     let displayCameraPos = [cameraPos[0], cameraPos[1]]
     let cameraZoom = camera.getZoom();
@@ -1103,12 +1123,14 @@ function drawCurrentSimToolbar() {
         displayCameraPos[1] = displayCameraPos[1] - relativeCentre[1];
     }
 
+    let modPos = Math.sqrt(displayCameraPos[0]**2 + displayCameraPos[1]**2);
+
     drawToolbar();
     drawToolbarIcons();
     timeRateTextBox.updateContents("x"+(simTimeRate * averageFrameRate).toPrecision(3));
     timeTextBox.updateContents(secondsToDisplayTime(simTime)); 
     camZoomTextBox.updateContents("x"+cameraZoom.toPrecision(3));
-    camPosTextBox.updateContents("( " + displayCameraPos[0].toPrecision(3) + " (m) , " + displayCameraPos[1].toPrecision(3) + "(m) ) ( mod (m), arg (°) )");
+    camPosTextBox.updateContents("( " + displayCameraPos[0].toPrecision(3) + " (m) , " + displayCameraPos[1].toPrecision(3) + "(m) ) ( " + modPos + " (m), arg (°) )");
     // ^ add mod arg display for ux & update units alongside the settings
 }
 

@@ -118,6 +118,9 @@ class UpdateBodyPopupBox extends Box {
     }
 
     changeVelocity() {
+        let relativeCentre = this.#linkedCamera.getRelativeCentre();
+        console.log("change vel rel centre vel:", relativeCentre.getVel());
+
         // prompt the user for a new body speed, with current unit
         let userInput = prompt('Enter new body speed ( leave blank to keep same speed ) ( ' + this.#displaySpeedUnit + ' ) (= ' + (1/speedUnits[this.#displaySpeedUnit]).toPrecision(3) + 'm/s )');
         
@@ -145,6 +148,12 @@ class UpdateBodyPopupBox extends Box {
             let angle = -parseFloat(angleInput);
             let radAngle = (angle / 360) * 2 * Math.PI;
             newVel = [newSpeed * Math.cos(radAngle), newSpeed * Math.sin(radAngle)];
+        }
+
+        if (relativeCentre instanceof Body) {
+            let relativeCentreVelocity = relativeCentre.getVel();
+            newVel[0] += relativeCentreVelocity[0];
+            newVel[1] += relativeCentreVelocity[1];
         }
 
         // update body's velocity
