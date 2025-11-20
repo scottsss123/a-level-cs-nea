@@ -63,6 +63,7 @@ class Simulation {
     }
     addBody(inBody) {
         this.#bodies.push(inBody);
+        this.#prevBodyPositions.push([]);
     }
     setPrevTimeRate() {
         this.#timeRate = this.#prevTimeRate;
@@ -84,8 +85,9 @@ class Simulation {
     }
     getBodyIndexByName(name) {
         for (let i = 0; i < this.#bodies.length; i++) {
+            let body = this.#bodies[i]
             if (body.getName() === name) {
-                return body;
+                return i;
             }
         }
     }
@@ -141,12 +143,27 @@ class Simulation {
         }
     }
 
+    updatePrevBodyPositions() { ////////////////TODO?????
+        let b = this.getBodyByName('earth');
+        let index = this.getBodyIndexByName('earth');
+        
+        if (this.#prevBodyPositions[index].length > 99) {
+            this.#prevBodyPositions[index].shift();
+        }
+        if (frameCount % 6 == 0) {
+            this.#prevBodyPositions[index].push(b.getPos());
+        }
+    }
+
+    getPrevBodyPositions() {
+        return this.#prevBodyPositions;
+    }
+
     step() {
         this.#time += this.#timeRate;
         this.updateBodyVelocities();
         this.updateBodyPositions();         
-        // implement this usefully, camera follow feature
-        //this.#camera.setPosition(this.#bodies[0].getPos());
+        this.updatePrevBodyPositions();
         return;
     }
 
@@ -172,6 +189,7 @@ class Simulation {
         }
 
         return {
+            // incorporate new relative centre
             bodies: bodyArr, 
             camera: this.#camera.getCameraData(),
             time: this.#time,

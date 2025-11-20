@@ -53,6 +53,7 @@ let bodyImages = {};
 let loadSimulationIndex = 0;
 
 let dragOffset = [0,0];
+let defaultCamSpeed = 3e8/100;
 
 // executed before setup to load assets in more modular way
 function preload() {
@@ -608,6 +609,7 @@ function draw() {
             drawCurrentSimToolbar();
             drawInfoPopupBoxes();
             drawUpdateBodyPopupBox();
+            drawSimulationPrevBodyPositions();
             break;
         case states.indexOf('learn menu'):  // learn menu
             break;
@@ -634,6 +636,24 @@ function draw() {
     drawTextBoxes();
     drawCurrentState();
     
+}
+
+function drawSimulationPrevBodyPositions() {
+    stroke('magenta');
+    strokeWeight(2);
+    let prevBodyPositions = currentSimulation.getPrevBodyPositions();
+    let index = currentSimulation.getBodyIndexByName('earth');
+    let camera = currentSimulation.getCamera();
+
+    for (i = 60; i < prevBodyPositions[index].length - 1; i += 60) {
+        let prevPos = prevBodyPositions[index][i-60];
+        let currPos = prevBodyPositions[index][i];
+        let prevCanvasPos = camera.getSimPointCanvasPosition(prevPos[0], prevPos[1]);
+        let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
+        //line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
+        
+    }
+
 }
 
 function loadSettings(settings) {
@@ -1138,30 +1158,31 @@ function drawCurrentSimToolbar() {
 }
 
 function mainSimKeyHeldHandler() {
-    
+    let zoomFactor = 1 / currentSimulation.getCamera().getZoom();
+    //TODO:variable cam speed
     if (keyIsDown('d') || keyIsDown(RIGHT_ARROW)) {
         if (currentSimulation.getFocus())
-            currentSimulation.getCamera().updateFocusOffset([3e8/70,0]);
+            currentSimulation.getCamera().updateFocusOffset([defaultCamSpeed * zoomFactor,0]);
         else
-            currentSimulation.getCamera().updatePosition([3e8/70,0]);
+            currentSimulation.getCamera().updatePosition([defaultCamSpeed * zoomFactor,0]);
     } 
     if (keyIsDown('a') || keyIsDown(LEFT_ARROW)) {
         if (currentSimulation.getFocus())
-            currentSimulation.getCamera().updateFocusOffset([-3e8/70,0]);
+            currentSimulation.getCamera().updateFocusOffset([-defaultCamSpeed * zoomFactor,0]);
         else
-            currentSimulation.getCamera().updatePosition([-3e8/70,0]);
+            currentSimulation.getCamera().updatePosition([-defaultCamSpeed * zoomFactor,0]);
     }
     if (keyIsDown('w') || keyIsDown(UP_ARROW)) {
         if (currentSimulation.getFocus())
-            currentSimulation.getCamera().updateFocusOffset([0,-3e8/70]);
+            currentSimulation.getCamera().updateFocusOffset([0,-defaultCamSpeed * zoomFactor]);
         else
-            currentSimulation.getCamera().updatePosition([0,-3e8/70]);
+            currentSimulation.getCamera().updatePosition([0,-defaultCamSpeed * zoomFactor]);
     }
     if (keyIsDown('s') || keyIsDown(DOWN_ARROW)) {
         if (currentSimulation.getFocus())
-            currentSimulation.getCamera().updateFocusOffset([0,3e8/70]);
+            currentSimulation.getCamera().updateFocusOffset([0,defaultCamSpeed * zoomFactor]);
         else
-            currentSimulation.getCamera().updatePosition([0,3e8/70]);
+            currentSimulation.getCamera().updatePosition([0,defaultCamSpeed * zoomFactor]);
     }
 }
 
@@ -1180,6 +1201,9 @@ function mouseWheel(event) {
     if (keyIsDown('control')) {
         upFactor = 1.01;
         downFactor = 1/1.01;
+    } else if (keyIsDown('shift')) {
+        upFactor = zoomInFactor ** 3;
+        downFactor = zoomOutFactor ** 3;
     }
 
 
