@@ -143,24 +143,44 @@ class Simulation {
         }
     }
 
-    updatePrevBodyPositions() { ////////////////TODO?????
-        let b = this.getBodyByName('earth');
-        let index = this.getBodyIndexByName('earth');
-        
-        if (this.#prevBodyPositions[index].length > 99) {
-            this.#prevBodyPositions[index].shift();
+    getCentreOfMassPosition() {
+        let pos = [0,0];
+        let reciprocalOftotalMass = 1 / this.getTotalMass();
+        for (let body of this.#bodies) {
+            let bodyPos = body.getPos();
+            let bodyMass = body.getMass();
+            pos[0] += reciprocalOftotalMass * bodyMass * bodyPos[0];
+            pos[1] += reciprocalOftotalMass * bodyMass * bodyPos[1];
         }
-        if (frameCount % 6 == 0) {
-            this.#prevBodyPositions[index].push(b.getPos());
+        return pos;
+    }
+
+    getTotalMass() {
+        let totalMass = 0;
+        for (let body of this.#bodies) {
+            totalMass += body.getMass();
+        }
+        return totalMass;
+    }
+
+    updatePrevBodyPositions() {
+        for (let i = 0; i < this.#bodies.length; i++) {
+            let pos = this.#bodies[i].getPos();
+
+            if (this.#prevBodyPositions[i].length > 999) {
+                this.#prevBodyPositions[i].shift();
+            }
+            this.#prevBodyPositions[i].push([pos[0], pos[1]]);
         }
     }
 
-    getPrevBodyPositions() {
-        return this.#prevBodyPositions;
+    getPrevBodyPositionsByIndex(index) {
+        return this.#prevBodyPositions[index];
     }
 
     step() {
         this.#time += this.#timeRate;
+        
         this.updateBodyVelocities();
         this.updateBodyPositions();         
         this.updatePrevBodyPositions();

@@ -55,6 +55,9 @@ let loadSimulationIndex = 0;
 let dragOffset = [0,0];
 let defaultCamSpeed = 3e8/100;
 
+let futureEarthPositions = [];
+let displayBodyPaths = false;
+
 // executed before setup to load assets in more modular way
 function preload() {
     loadFont("./assets/monoMMM_5.ttf");
@@ -605,11 +608,14 @@ function draw() {
         case states.indexOf('main menu'):  // main menu
             break;
         case states.indexOf('main simulation'):  // main simulation
+            if (displayBodyPaths) {
+                drawSimulationPrevBodyPositions();
+            }
+
             drawCurrentSimBodies();
             drawCurrentSimToolbar();
             drawInfoPopupBoxes();
             drawUpdateBodyPopupBox();
-            drawSimulationPrevBodyPositions();
             break;
         case states.indexOf('learn menu'):  // learn menu
             break;
@@ -635,23 +641,26 @@ function draw() {
     drawButtons();
     drawTextBoxes();
     drawCurrentState();
+
+    
     
 }
 
 function drawSimulationPrevBodyPositions() {
     stroke('magenta');
     strokeWeight(2);
-    let prevBodyPositions = currentSimulation.getPrevBodyPositions();
-    let index = currentSimulation.getBodyIndexByName('earth');
-    let camera = currentSimulation.getCamera();
 
-    for (i = 60; i < prevBodyPositions[index].length - 1; i += 60) {
-        let prevPos = prevBodyPositions[index][i-60];
-        let currPos = prevBodyPositions[index][i];
-        let prevCanvasPos = camera.getSimPointCanvasPosition(prevPos[0], prevPos[1]);
-        let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
-        //line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
-        
+    let camera = currentSimulation.getCamera();
+    
+    for (let i = 0; i < currentSimulation.getBodies().length; i++) {
+        let prevBodyPositions = currentSimulation.getPrevBodyPositionsByIndex(i);
+        for (let j = 1; j < prevBodyPositions.length; j++) {
+            let prevPos = prevBodyPositions[j-1];
+            let currPos = prevBodyPositions[j];
+            let prevCanvasPos = camera.getSimPointCanvasPosition(prevPos[0], prevPos[1]);
+            let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
+            line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
+        }
     }
 
 }
@@ -1023,6 +1032,9 @@ function keyPressed() {
                     if (!cursorOverlapsBody) {
                         camera.setRelativeCentre(undefined);
                     }
+                    break;
+                case 84: //t -> toggle display body paths
+                    displayBodyPaths = displayBodyPaths ? false : true;
                     break;
             }
             break;
