@@ -651,12 +651,42 @@ function drawSimulationPrevBodyPositions() {
     strokeWeight(2);
 
     let camera = currentSimulation.getCamera();
+
+    if (camera.getRelativeCentre() instanceof Body) {
+        let relativeCentreIndex = currentSimulation.getBodyIndexByName(camera.getRelativeCentre().getName());
+        let relativeCentrePrevPositions = currentSimulation.getPrevBodyPositionsByIndex(relativeCentreIndex);
+        let relativeCentrePos = camera.getRelativeCentre().getPos();
+
+        for (let i = 0; i < currentSimulation.getBodies().length; i++) {
+            let prevBodyPositions = currentSimulation.getPrevBodyPositionsByIndex(i);
+
+            if (i == relativeCentreIndex) continue;
+            for (let j = 0; j < prevBodyPositions.length; j++) {
+                
+            }
+        }
+        return;
+    }
     
     for (let i = 0; i < currentSimulation.getBodies().length; i++) {
         let prevBodyPositions = currentSimulation.getPrevBodyPositionsByIndex(i);
         for (let j = 1; j < prevBodyPositions.length; j++) {
+            //
+            let earthPrevPos = currentSimulation.getPrevBodyPositionsByIndex(0)[j-1];
+            let earthCurrPos = currentSimulation.getPrevBodyPositionsByIndex(0)[j]
+            let earthPos = currentSimulation.getBodies()[0].getPos();
+            //
+            
             let prevPos = prevBodyPositions[j-1];
             let currPos = prevBodyPositions[j];
+            prevPos[0] -= earthPrevPos[0];
+            prevPos[1] -= earthPrevPos[1]; ////////TODO, fix this with photo alg
+            currPos[0] -= earthCurrPos[0];
+            currPos[1] -= earthCurrPos[1];
+            prevPos[0] += earthPos[0];
+            prevPos[1] += earthPos[1];
+            currPos[0] += earthPos[0];
+            currPos[1] += earthPos[1];
             let prevCanvasPos = camera.getSimPointCanvasPosition(prevPos[0], prevPos[1]);
             let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
             line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
@@ -1019,6 +1049,7 @@ function keyPressed() {
                     currentSimulation.setData(JSON.stringify(quickSavedSimulation.getSimulationData()));
                     infoPopupBoxes = [];
                     updateBodyPopupBox = -1;
+                    currentSimulation.resetPrevBodyPositions();
                     break;
                 case 82: //r -> set relative position
                     let cursorOverlapsBody = false;

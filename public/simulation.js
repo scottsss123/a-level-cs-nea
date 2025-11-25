@@ -8,7 +8,7 @@ class Simulation {
     #focus; // bool / string
     #id;
 
-    #prevBodyPositions; ///////////////////////////////////////////////////////////////// draw prev paths :)
+    #prevBodyPositions; 
 
     constructor() {
         this.#camera = new Camera([0,0], 1);
@@ -143,7 +143,7 @@ class Simulation {
         }
     }
 
-    getCentreOfMassPosition() {
+    getCentreOfMassPosition() { /////////////////////////////////TODO
         let pos = [0,0];
         let reciprocalOftotalMass = 1 / this.getTotalMass();
         for (let body of this.#bodies) {
@@ -161,6 +161,12 @@ class Simulation {
             totalMass += body.getMass();
         }
         return totalMass;
+    }
+
+    resetPrevBodyPositions() {
+        for (let i = 0; i < this.#prevBodyPositions.length; i++) {
+            this.#prevBodyPositions[i] = [];
+        }
     }
 
     updatePrevBodyPositions() {

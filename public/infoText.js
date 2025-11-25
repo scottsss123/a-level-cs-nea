@@ -48,6 +48,9 @@ Move     existing       body info box   :  Control + left click + drag
 Move     existing       body change box :  Control + left click + drag
 Create   new            body            :  Control + Alt + Right click , cursor outside body
 Move     existing       body            :  Control + Left click + drag
+quick    save           simulation      :  q
+quick    load           simulation      :  l
+
     
 Load simulation menu controls  
 -----------------------------
