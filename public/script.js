@@ -651,48 +651,33 @@ function drawSimulationPrevBodyPositions() {
     strokeWeight(2);
 
     let camera = currentSimulation.getCamera();
-
+    
     if (camera.getRelativeCentre() instanceof Body) {
-        let relativeCentreIndex = currentSimulation.getBodyIndexByName(camera.getRelativeCentre().getName());
-        let relativeCentrePrevPositions = currentSimulation.getPrevBodyPositionsByIndex(relativeCentreIndex);
-        let relativeCentrePos = camera.getRelativeCentre().getPos();
+        let bodyPos = camera.getRelativeCentre().getPos();
 
-        for (let i = 0; i < currentSimulation.getBodies().length; i++) {
+        for (let i = 0; i < currentSimulation.getBodies().length; i++) { /// TODO FIX OFFSET & accuracy
             let prevBodyPositions = currentSimulation.getPrevBodyPositionsByIndex(i);
+            for (let j = 1; j < prevBodyPositions.length; j++) {
+                //
+                let bodyPrevPos = currentSimulation.getPrevBodyPositionsByIndex(0)[j-1];
+                let bodyCurrPos = currentSimulation.getPrevBodyPositionsByIndex(0)[j]
+                //
 
-            if (i == relativeCentreIndex) continue;
-            for (let j = 0; j < prevBodyPositions.length; j++) {
-                
+                let prevPos = prevBodyPositions[j-1];
+                let currPos = prevBodyPositions[j];
+                //
+                let prevDif = [prevPos[0] - bodyPrevPos[0], prevPos[1] - bodyPrevPos[1]];
+                let currDif = [currPos[0] - bodyCurrPos[0], currPos[1] - bodyCurrPos[1]];
+
+                prevPos = [bodyPos[0] + prevDif[0], bodyPos[1] + prevDif[1]];
+                currPos = [bodyPos[0] + currDif[0], bodyPos[1] + currDif[1]];
+
+                let prevCanvasPos = camera.getSimPointCanvasPosition(prevPos[0], prevPos[1]);
+                let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
+                line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
             }
         }
-        return;
     }
-    
-    for (let i = 0; i < currentSimulation.getBodies().length; i++) {
-        let prevBodyPositions = currentSimulation.getPrevBodyPositionsByIndex(i);
-        for (let j = 1; j < prevBodyPositions.length; j++) {
-            //
-            let earthPrevPos = currentSimulation.getPrevBodyPositionsByIndex(0)[j-1];
-            let earthCurrPos = currentSimulation.getPrevBodyPositionsByIndex(0)[j]
-            let earthPos = currentSimulation.getBodies()[0].getPos();
-            //
-            
-            let prevPos = prevBodyPositions[j-1];
-            let currPos = prevBodyPositions[j];
-            prevPos[0] -= earthPrevPos[0];
-            prevPos[1] -= earthPrevPos[1]; ////////TODO, fix this with photo alg
-            currPos[0] -= earthCurrPos[0];
-            currPos[1] -= earthCurrPos[1];
-            prevPos[0] += earthPos[0];
-            prevPos[1] += earthPos[1];
-            currPos[0] += earthPos[0];
-            currPos[1] += earthPos[1];
-            let prevCanvasPos = camera.getSimPointCanvasPosition(prevPos[0], prevPos[1]);
-            let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
-            line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
-        }
-    }
-
 }
 
 function loadSettings(settings) {

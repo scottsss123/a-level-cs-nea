@@ -170,6 +170,9 @@ class Simulation {
     }
 
     updatePrevBodyPositions() {
+        if (this.#timeRate === 0) {
+            return;
+        }
         for (let i = 0; i < this.#bodies.length; i++) {
             let pos = this.#bodies[i].getPos();
 
