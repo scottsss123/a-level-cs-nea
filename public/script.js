@@ -563,15 +563,19 @@ function update() {
         case 1:  // main simulation
             // handle held keys, for camera movement
             mainSimKeyHeldHandler();
+
+
             
             if (currentlyDragging instanceof Body) {
-                console.log(dragOffset);
                 currentlyDragging.setPos(currentSimulation.getCamera().getCursorSimPosition(mouseX - dragOffset[0],mouseY - dragOffset[1]));
             } else if (currentlyDragging instanceof BodyInfoPopupBox || currentlyDragging instanceof UpdateBodyPopupBox) {
                 currentlyDragging.setPos([mouseX - dragOffset[0], mouseY - dragOffset[1]]);
             }
 
             currentSimulation.step();
+
+            currentSimulation.moveCameraToFocus();
+
 
             updateInfoPopupBoxes();
             break;
@@ -647,7 +651,7 @@ function draw() {
 }
 
 function drawSimulationPrevBodyPositions() {
-    stroke('magenta');
+    stroke([50,50,200]);
     strokeWeight(2);
 
     let camera = currentSimulation.getCamera();
@@ -655,12 +659,14 @@ function drawSimulationPrevBodyPositions() {
     if (camera.getRelativeCentre() instanceof Body) {
         let bodyPos = camera.getRelativeCentre().getPos();
 
-        for (let i = 0; i < currentSimulation.getBodies().length; i++) { /// TODO FIX OFFSET & accuracy
+        // TODO REFACTOR into DRAW LINES FUNCTION FOR RELATIVE & GLOBAL
+        for (let i = 0; i < currentSimulation.getBodies().length; i++) { /// TODO FIX OFFSET FOR NON-EARTH BODIES
             let prevBodyPositions = currentSimulation.getPrevBodyPositionsByIndex(i);
+            let relativeCentreIndex = currentSimulation.getBodyIndexByName(camera.getRelativeCentre().getName());
             for (let j = 1; j < prevBodyPositions.length; j++) {
                 //
-                let bodyPrevPos = currentSimulation.getPrevBodyPositionsByIndex(0)[j-1];
-                let bodyCurrPos = currentSimulation.getPrevBodyPositionsByIndex(0)[j]
+                let bodyPrevPos = currentSimulation.getPrevBodyPositionsByIndex(relativeCentreIndex)[j-1];
+                let bodyCurrPos = currentSimulation.getPrevBodyPositionsByIndex(relativeCentreIndex)[j]
                 //
 
                 let prevPos = prevBodyPositions[j-1];
@@ -676,6 +682,18 @@ function drawSimulationPrevBodyPositions() {
                 let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
                 line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
             }
+        }
+        return;
+    }
+
+    for (let i = 0; i < currentSimulation.getBodies().length; i++) {
+        let prevBodyPositions = currentSimulation.getPrevBodyPositionsByIndex(i);
+        for (let j = 1; j < prevBodyPositions.length; j++) {
+            let prevPos = prevBodyPositions[j-1];
+            let currPos = prevBodyPositions[j];
+            let prevCanvasPos = camera.getSimPointCanvasPosition(prevPos[0], prevPos[1]);
+            let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
+            line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
         }
     }
 }
@@ -991,7 +1009,7 @@ function mouseReleased(event) {
                             let relativeCentreVelocity = relativeCentre.getVel();
                             let newBody = currentSimulation.getBodies().at(-1);
                             newBody.setVel(relativeCentreVelocity);
-                            newBody.setMinCanvasDiameter(0);
+                            newBody.setMinCanvasDiameter(2);
                         }
                     }
             }
@@ -1082,7 +1100,6 @@ function drawCurrentSimBodies() {
     imageMode(CENTER);
     ellipseMode(CENTER);
 
-    currentSimulation.moveCameraToFocus();
 
     // cache current simulation camera and bodies to not call .getCamera(), .getBodies() many times
     let camera = currentSimulation.getCamera();

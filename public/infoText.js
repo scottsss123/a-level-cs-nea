@@ -34,22 +34,24 @@ const simulationTutorialString = `Controls
 ----------------------------------------------------------------------------------------------------------------------
 Simulation Controls
 -------------------
-Open                    Pause Menu      :  Escape
-Toggle   simulation     running         :  Spacebar
-Adjust   camera's       position        :  w, a, s, d  /  ↑, ←, ↓, →
-Adjust   camera's       Zoom            :  scroll up   /  scroll down  (hold control for more precise scrolling input)
-Adjust   simulation's   time rate       :  scroll up   /  scroll down  (while mouse over time rate 'x0.000') (for now)
-Follow   existing       body            :  f, type body name, enter
-Pan to   existing       body            :  p, type body name, enter
-Stop     following      body            :  f, enter
-Create   new            body info box   :  left click,  on body
-Create   new            body change box :  right click, cursor on body
-Move     existing       body info box   :  Control + left click + drag
-Move     existing       body change box :  Control + left click + drag
-Create   new            body            :  Control + Alt + Right click , cursor outside body
-Move     existing       body            :  Control + Left click + drag
-quick    save           simulation      :  q
-quick    load           simulation      :  l
+Open                    Pause Menu       :  Escape
+Toggle   simulation     running          :  Spacebar
+Adjust   camera's       position         :  w, a, s, d  /  ↑, ←, ↓, →
+Adjust   camera's       Zoom             :  scroll up   /  scroll down  (hold control for more precise scrolling input)
+Adjust   simulation's   time rate        :  scroll up   /  scroll down  (while mouse over time rate 'x0.000') (for now)
+Follow   existing       body             :  f, type body name, enter
+Pan to   existing       body             :  p, type body name, enter
+Stop     following      body             :  f, enter
+Create   new            body info box    :  left click,  on body
+Create   new            body change box  :  right click, cursor on body
+Move     existing       body info box    :  Control + left click + drag
+Move     existing       body change box  :  Control + left click + drag
+Create   new            body             :  Control + Alt + Right click , cursor outside body
+Move     existing       body             :  Control + Left click + drag
+quick    save           simulation       :  q
+quick    load           simulation       :  l
+show     path           of bodies        :  t
+set      info           relative to body :  r, while mouse over body
 
     
 Load simulation menu controls  
