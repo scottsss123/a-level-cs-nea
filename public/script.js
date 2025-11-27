@@ -400,25 +400,29 @@ function setup() {
     function initialiseMainSimulation() {
         currentSimulation = new Simulation();
 
-        currentSimulation.addBody(new Body('earth', [0,0], [0,29.78e3], 5.972e24, 12756274, "earth", [0,0,255]));
-        currentSimulation.addBody(new Body('moon', [384400000, 0], [0,29.78e3+1.022e3], 7.35e22, 3474e3, "moon", [220,220,220]));
+        currentSimulation.addBody(new Body('earth', [0,0], [0,29.78e3 + 230e3], 5.972e24, 12756274, "earth", [0,0,255]));
+        currentSimulation.addBody(new Body('moon', [384400000, 0], [0,29.78e3+1.022e3 + 230e3], 7.35e22, 3474e3, "moon", [220,220,220]));
        
 
-        currentSimulation.addBody(new Body('sun', [-149.6e9, 0], [0,0], 1.988e30, 1.39e9, "sun", [255,234,0]));
+        currentSimulation.addBody(new Body('sun', [-149.6e9, 0], [0,0 + 230e3], 1.988e30, 1.39e9, "sun", [255,234,0]));
 
-        currentSimulation.addBody(new Body('mars', [-149.6e9 + 2.2794e11,0], [0,24e3], 6.4191e23, 7.9238e6, "mars", [255,0,0]));
-        currentSimulation.addBody(new Body('mercury', [-149.6e9 + 5.791e10, 0], [0,47.4e3], 3.3011e23, 4.88e6, "mercury", [220,220,220]));
-        currentSimulation.addBody(new Body('venus', [-149.6e9 + 1.0821e11, 0], [0,35e3], 4.8675e24, 1.21036e7, "venus", [200, 20, 20]));
-        currentSimulation.addBody(new Body('jupiter', [-149.6e9 + 7.7841e11, 0], [0,13.1e3], 1.8982e27, 1.42984e8, "jupiter", [100, 50, 70]));
-        currentSimulation.addBody(new Body('saturn', [-149.6e9 + 1.43e12, 0], [0, 9.69e3], 5.683e26, 1.1647e8, "saturn", [255,255,255]));
-        currentSimulation.addBody(new Body('uranus', [-149.6e9 + 2.87e12, 0], [0, 6.835e3], 8.6810e25, 5.0724e7, "uranus", [255,255,255]));
-        currentSimulation.addBody(new Body('neptune', [-149.6e9 + 4.5e12, 0], [0, 5.43e3], 1.02409e26, 4.9244e7, "neptune", [255,255,255]));
-        
-	    //bodies.push(new Body("phobos", 1.06e16, 11e3, [2.2794e11, 9.376e6], [2.1e3, 24e3], 'grey'));
-	    //bodies.push(new Body("uranus", 8.6810e25, 5.0724e7, [2.87e12, 0], [0, 6.835e3], '#B2D6DB'));
-	    //bodies.push(new Body("neptune", 1.02409e26, 4.9244e7, [4.5e12, 0],[0, 5.43e3], '#7CB7BB'));
+        currentSimulation.addBody(new Body('mars', [-149.6e9 + 2.2794e11,0], [0,24e3 + 230e3], 6.4191e23, 7.9238e6, "mars", [255,0,0]));
+        currentSimulation.addBody(new Body('mercury', [-149.6e9 + 5.791e10, 0], [0,47.4e3 + 230e3], 3.3011e23, 4.88e6, "mercury", [220,220,220]));
+        currentSimulation.addBody(new Body('venus', [-149.6e9 + 1.0821e11, 0], [0,35e3 + 230e3], 4.8675e24, 1.21036e7, "venus", [200, 20, 20]));
+        currentSimulation.addBody(new Body('jupiter', [-149.6e9 + 7.7841e11, 0], [0,13.1e3 + 230e3], 1.8982e27, 1.42984e8, "jupiter", [100, 50, 70]));
+        currentSimulation.addBody(new Body('saturn', [-149.6e9 + 1.43e12, 0], [0, 9.69e3 + 230e3], 5.683e26, 1.1647e8, "saturn", [255,255,255]));
+        currentSimulation.addBody(new Body('uranus', [-149.6e9 + 2.87e12, 0], [0, 6.835e3 + 230e3], 8.6810e25, 5.0724e7, "uranus", [255,255,255]));
+        currentSimulation.addBody(new Body('neptune', [-149.6e9 + 4.5e12, 0], [0, 5.43e3 + 230e3], 1.02409e26, 4.9244e7, "neptune", [255,255,255]));
+        currentSimulation.addBody(new Body('ganymede', [-149.6e9 + 7.7841e11 + 1e9, 0], [0, 13.1e3 + 10.9e3 + 230e3], 1.48e23, (2634.1e3) *2, "moon", [255,255,255]));
+        //currentSimulation.addBody(new Body('phobos', [-149.6e9 + 2.2794e11 + 9376e3,0], [0,24e3 + 2.138e3 + 230e3], 1.06e16, 22.2e3, "moon", [255,255,255]));
+
+        currentSimulation.addBody(new Body('centre', [-149.6e9 - 2.5544e+20, 0], [0,0], 1.5e12 * 1.988e30, 1, "none", [255,255,255]));
 
         currentSimulation.getBodyByName('moon').setMinCanvasDiameter(0);
+        currentSimulation.getBodyByName('ganymede').setMinCanvasDiameter(0);
+        //currentSimulation.getBodyByName('phobos').setMinCanvasDiameter(0);
+        currentSimulation.getBodyByName('centre').setMinCanvasDiameter(100);
+
         currentSimulation.getBodyByName('sun').setMinCanvasDiameter(8);
 //
         //currentSimulation.getCamera().setZoom(1 * (1/1.1) ** 11);
@@ -651,50 +655,64 @@ function draw() {
 }
 
 function drawSimulationPrevBodyPositions() {
+    // same colourscheme as buttons
     stroke([50,50,200]);
     strokeWeight(2);
 
+    // cache current simulation camera, to be passed on 
     let camera = currentSimulation.getCamera();
     
     if (camera.getRelativeCentre() instanceof Body) {
-        let bodyPos = camera.getRelativeCentre().getPos();
+        let relativeCentrePos = camera.getRelativeCentre().getPos();
+        let relativeCentreIndex = currentSimulation.getBodyIndexByName(camera.getRelativeCentre().getName());
 
-        // TODO REFACTOR into DRAW LINES FUNCTION FOR RELATIVE & GLOBAL
-        for (let i = 0; i < currentSimulation.getBodies().length; i++) { /// TODO FIX OFFSET FOR NON-EARTH BODIES
-            let prevBodyPositions = currentSimulation.getPrevBodyPositionsByIndex(i);
-            let relativeCentreIndex = currentSimulation.getBodyIndexByName(camera.getRelativeCentre().getName());
-            for (let j = 1; j < prevBodyPositions.length; j++) {
-                //
-                let bodyPrevPos = currentSimulation.getPrevBodyPositionsByIndex(relativeCentreIndex)[j-1];
-                let bodyCurrPos = currentSimulation.getPrevBodyPositionsByIndex(relativeCentreIndex)[j]
-                //
-
-                let prevPos = prevBodyPositions[j-1];
-                let currPos = prevBodyPositions[j];
-                //
-                let prevDif = [prevPos[0] - bodyPrevPos[0], prevPos[1] - bodyPrevPos[1]];
-                let currDif = [currPos[0] - bodyCurrPos[0], currPos[1] - bodyCurrPos[1]];
-
-                prevPos = [bodyPos[0] + prevDif[0], bodyPos[1] + prevDif[1]];
-                currPos = [bodyPos[0] + currDif[0], bodyPos[1] + currDif[1]];
-
-                let prevCanvasPos = camera.getSimPointCanvasPosition(prevPos[0], prevPos[1]);
-                let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
-                line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
-            }
+        for (let i = 0; i < currentSimulation.getBodies().length; i++) { 
+            drawBodyRelativePrevPath(camera, i, relativeCentrePos, relativeCentreIndex);
         }
         return;
     }
 
     for (let i = 0; i < currentSimulation.getBodies().length; i++) {
-        let prevBodyPositions = currentSimulation.getPrevBodyPositionsByIndex(i);
-        for (let j = 1; j < prevBodyPositions.length; j++) {
-            let prevPos = prevBodyPositions[j-1];
-            let currPos = prevBodyPositions[j];
-            let prevCanvasPos = camera.getSimPointCanvasPosition(prevPos[0], prevPos[1]);
-            let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
-            line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
-        }
+        drawBodyPrevPath(camera, i);
+    }
+}
+
+function drawBodyRelativePrevPath(camera, bodyIndex, relativeCentrePos, relativeCentreIndex) {
+    // cache body and relative centre's previous paths
+    let prevBodyPositions = currentSimulation.getPrevBodyPositionsByIndex(bodyIndex);
+    let relCentrePositions = currentSimulation.getPrevBodyPositionsByIndex(relativeCentreIndex);
+
+    // for each pair of consecutive body positions
+    for (let j = 1; j < prevBodyPositions.length; j++) {
+        // calculate the change in position relative to the centre body
+        let bodyPrevPos = relCentrePositions[j-1];
+        let bodyCurrPos = relCentrePositions[j]
+
+        let prevPos = prevBodyPositions[j-1];
+        let currPos = prevBodyPositions[j];
+        
+        let prevDif = [prevPos[0] - bodyPrevPos[0], prevPos[1] - bodyPrevPos[1]];
+        let currDif = [currPos[0] - bodyCurrPos[0], currPos[1] - bodyCurrPos[1]];
+
+        prevPos = [relativeCentrePos[0] + prevDif[0], relativeCentrePos[1] + prevDif[1]];
+        currPos = [relativeCentrePos[0] + currDif[0], relativeCentrePos[1] + currDif[1]];
+
+        let prevCanvasPos = camera.getSimPointCanvasPosition(prevPos[0], prevPos[1]);
+        let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
+        // draw line between difference
+        line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
+    }
+}
+
+function drawBodyPrevPath(camera, bodyIndex) {
+    // for each pair of consecutive body positions, draw a line between them
+    let prevBodyPositions = currentSimulation.getPrevBodyPositionsByIndex(bodyIndex);
+    for (let j = 1; j < prevBodyPositions.length; j++) {
+        let prevPos = prevBodyPositions[j-1];
+        let currPos = prevBodyPositions[j];
+        let prevCanvasPos = camera.getSimPointCanvasPosition(prevPos[0], prevPos[1]);
+        let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
+        line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
     }
 }
 
