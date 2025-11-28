@@ -9,6 +9,7 @@ class Simulation {
     #id;
 
     #prevBodyPositions; 
+    #prevPathInterval;
 
     constructor() {
         this.#camera = new Camera([0,0], 1);
@@ -19,6 +20,7 @@ class Simulation {
         this.#G = 6.67430e-11;
         this.#focus = false;
         this.#prevBodyPositions = [];
+        this.#prevPathInterval = 1;
     }
 
 
@@ -184,7 +186,7 @@ class Simulation {
             }
 
             // TODO ALLOW USER TO EDIT THIS
-            if (frameCount % 5 == 0) this.#prevBodyPositions[i].push([pos[0], pos[1]]);
+            if (frameCount % this.#prevPathInterval == 0) this.#prevBodyPositions[i].push([pos[0], pos[1]]);
         }
     }
 

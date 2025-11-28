@@ -52,6 +52,8 @@ quick    save           simulation       :  q
 quick    load           simulation       :  l
 show     path           of bodies        :  t
 set      info           relative to body :  r, while mouse over body
+toggle   display        background       :  b
+toggle   display        real scale       :  n
 
     
 Load simulation menu controls  

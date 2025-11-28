@@ -632,6 +632,9 @@ function draw() {
         case states.indexOf('learn menu'):  // learn menu
             break;
         case states.indexOf('pause menu'):  // pause menu
+            if (displayBodyPaths) {
+                drawSimulationPrevBodyPositions();
+            }
             drawCurrentSimBodies();
             // possible bodge {
             drawCurrentSimToolbar();
@@ -672,7 +675,9 @@ function drawSimulationPrevBodyPositions() {
 
         for (let i = 0; i < currentSimulation.getBodies().length; i++) { 
             if (i == relativeCentreIndex) {
+                stroke([25,25,100]);
                 drawBodyPrevPath(camera, i);
+                stroke([50,50,200]);
             }
             drawBodyRelativePrevPath(camera, i, relativeCentrePos, relativeCentreIndex);
         }
@@ -1095,9 +1100,6 @@ function keyPressed() {
                 case 84: //t -> toggle display body paths
                     displayBodyPaths = displayBodyPaths ? false : true;
                     break;
-                case 66: //b -> toggle draw background image
-                    drawBackgroundImage = drawBackgroundImage ? false : true;
-                    break;
                 case 78: //n -> toggle body min canvas diameter
                     drawBodyMinCanvasDiamter = drawBodyMinCanvasDiamter ? false : true;
                     break;
@@ -1121,6 +1123,12 @@ function keyPressed() {
 
             socket.emit('updateSavedSimulationDescriptionBoxes', currentUserID);
             socket.emit('updatePublicSimulationDescriptionBoxes');
+            break;
+    }
+
+    switch (keyCode) {
+        case 66: //b -> toggle draw background image
+            drawBackgroundImage = drawBackgroundImage ? false : true;
             break;
     }
 }
