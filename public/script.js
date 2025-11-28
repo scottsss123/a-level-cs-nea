@@ -57,6 +57,8 @@ let defaultCamSpeed = 3e8/100;
 
 let futureEarthPositions = [];
 let displayBodyPaths = false;
+let drawBackgroundImage = true;
+let drawBodyMinCanvasDiamter = true;
 
 // executed before setup to load assets in more modular way
 function preload() {
@@ -400,30 +402,30 @@ function setup() {
     function initialiseMainSimulation() {
         currentSimulation = new Simulation();
 
-        currentSimulation.addBody(new Body('earth', [0,0], [0,29.78e3 + 230e3], 5.972e24, 12756274, "earth", [0,0,255]));
-        currentSimulation.addBody(new Body('moon', [384400000, 0], [0,29.78e3+1.022e3 + 230e3], 7.35e22, 3474e3, "moon", [220,220,220]));
+        currentSimulation.addBody(new Body('earth', [0,0], [0,29.78e3], 5.972e24, 12756274, "earth", [0,0,255]));
+        currentSimulation.addBody(new Body('moon', [384400000, 0], [0,29.78e3+1.022e3], 7.35e22, 3474e3, "moon", [220,220,220]));
        
 
-        currentSimulation.addBody(new Body('sun', [-149.6e9, 0], [0,0 + 230e3], 1.988e30, 1.39e9, "sun", [255,234,0]));
+        currentSimulation.addBody(new Body('sun', [-149.6e9, 0], [0,0], 1.988e30, 1.39e9, "sun", [255,234,0]));
 
-        currentSimulation.addBody(new Body('mars', [-149.6e9 + 2.2794e11,0], [0,24e3 + 230e3], 6.4191e23, 7.9238e6, "mars", [255,0,0]));
-        currentSimulation.addBody(new Body('mercury', [-149.6e9 + 5.791e10, 0], [0,47.4e3 + 230e3], 3.3011e23, 4.88e6, "mercury", [220,220,220]));
-        currentSimulation.addBody(new Body('venus', [-149.6e9 + 1.0821e11, 0], [0,35e3 + 230e3], 4.8675e24, 1.21036e7, "venus", [200, 20, 20]));
-        currentSimulation.addBody(new Body('jupiter', [-149.6e9 + 7.7841e11, 0], [0,13.1e3 + 230e3], 1.8982e27, 1.42984e8, "jupiter", [100, 50, 70]));
-        currentSimulation.addBody(new Body('saturn', [-149.6e9 + 1.43e12, 0], [0, 9.69e3 + 230e3], 5.683e26, 1.1647e8, "saturn", [255,255,255]));
-        currentSimulation.addBody(new Body('uranus', [-149.6e9 + 2.87e12, 0], [0, 6.835e3 + 230e3], 8.6810e25, 5.0724e7, "uranus", [255,255,255]));
-        currentSimulation.addBody(new Body('neptune', [-149.6e9 + 4.5e12, 0], [0, 5.43e3 + 230e3], 1.02409e26, 4.9244e7, "neptune", [255,255,255]));
-        currentSimulation.addBody(new Body('ganymede', [-149.6e9 + 7.7841e11 + 1e9, 0], [0, 13.1e3 + 10.9e3 + 230e3], 1.48e23, (2634.1e3) *2, "moon", [255,255,255]));
-        //currentSimulation.addBody(new Body('phobos', [-149.6e9 + 2.2794e11 + 9376e3,0], [0,24e3 + 2.138e3 + 230e3], 1.06e16, 22.2e3, "moon", [255,255,255]));
+        currentSimulation.addBody(new Body('mars', [-149.6e9 + 2.2794e11,0], [0,24e3], 6.4191e23, 7.9238e6, "mars", [255,0,0]));
+        currentSimulation.addBody(new Body('mercury', [-149.6e9 + 5.791e10, 0], [0,47.4e3], 3.3011e23, 4.88e6, "mercury", [220,220,220]));
+        currentSimulation.addBody(new Body('venus', [-149.6e9 + 1.0821e11, 0], [0,35e3], 4.8675e24, 1.21036e7, "venus", [200, 20, 20]));
+        currentSimulation.addBody(new Body('jupiter', [-149.6e9 + 7.7841e11, 0], [0,13.1e3], 1.8982e27, 1.42984e8, "jupiter", [100, 50, 70]));
+        currentSimulation.addBody(new Body('saturn', [-149.6e9 + 1.43e12, 0], [0, 9.69e3], 5.683e26, 1.1647e8, "saturn", [255,255,255]));
+        currentSimulation.addBody(new Body('uranus', [-149.6e9 + 2.87e12, 0], [0, 6.835e3], 8.6810e25, 5.0724e7, "uranus", [255,255,255]));
+        currentSimulation.addBody(new Body('neptune', [-149.6e9 + 4.5e12, 0], [0, 5.43e3], 1.02409e26, 4.9244e7, "neptune", [255,255,255]));
+        //currentSimulation.addBody(new Body('ganymede', [-149.6e9 + 7.7841e11 + 1e9, 0], [0, 13.1e3 + 10.9e3], 1.48e23, (2634.1e3) *2, "moon", [255,255,255]));
+        //currentSimulation.addBody(new Body('phobos', [-149.6e9 + 2.2794e11 + 9376e3,0], [0,24e3 + 2.138e3], 1.06e16, 22.2e3, "moon", [255,255,255]));
 
-        currentSimulation.addBody(new Body('centre', [-149.6e9 - 2.5544e+20, 0], [0,0], 1.5e12 * 1.988e30, 1, "none", [255,255,255]));
+        //currentSimulation.addBody(new Body('centre', [-149.6e9 - 2.5544e+20, 0], [0,0], 1.5e12 * 1.988e30, 1, "none", [255,255,255]));
 
         currentSimulation.getBodyByName('moon').setMinCanvasDiameter(0);
-        currentSimulation.getBodyByName('ganymede').setMinCanvasDiameter(0);
+        //currentSimulation.getBodyByName('ganymede').setMinCanvasDiameter(0);
         //currentSimulation.getBodyByName('phobos').setMinCanvasDiameter(0);
-        currentSimulation.getBodyByName('centre').setMinCanvasDiameter(100);
+        //currentSimulation.getBodyByName('centre').setMinCanvasDiameter(10);
 
-        currentSimulation.getBodyByName('sun').setMinCanvasDiameter(8);
+        currentSimulation.getBodyByName('sun').setMinCanvasDiameter(5);
 //
         //currentSimulation.getCamera().setZoom(1 * (1/1.1) ** 11);
         //currentSimulation.getCamera().setPosition([0, 0]);
@@ -609,7 +611,9 @@ function draw() {
 
     // starry background
     background(0);
-    image(starFieldBackgroundImage, 0, 0, width, height);
+    if (drawBackgroundImage) {
+        image(starFieldBackgroundImage, 0, 0, width, height);
+    }
 
     // display different elements based on program state   
     switch (state) {
@@ -657,16 +661,19 @@ function draw() {
 function drawSimulationPrevBodyPositions() {
     // same colourscheme as buttons
     stroke([50,50,200]);
-    strokeWeight(2);
+    strokeWeight(1);
 
     // cache current simulation camera, to be passed on 
     let camera = currentSimulation.getCamera();
-    
+
     if (camera.getRelativeCentre() instanceof Body) {
         let relativeCentrePos = camera.getRelativeCentre().getPos();
         let relativeCentreIndex = currentSimulation.getBodyIndexByName(camera.getRelativeCentre().getName());
 
         for (let i = 0; i < currentSimulation.getBodies().length; i++) { 
+            if (i == relativeCentreIndex) {
+                drawBodyPrevPath(camera, i);
+            }
             drawBodyRelativePrevPath(camera, i, relativeCentrePos, relativeCentreIndex);
         }
         return;
@@ -1088,6 +1095,12 @@ function keyPressed() {
                 case 84: //t -> toggle display body paths
                     displayBodyPaths = displayBodyPaths ? false : true;
                     break;
+                case 66: //b -> toggle draw background image
+                    drawBackgroundImage = drawBackgroundImage ? false : true;
+                    break;
+                case 78: //n -> toggle body min canvas diameter
+                    drawBodyMinCanvasDiamter = drawBodyMinCanvasDiamter ? false : true;
+                    break;
             }
             break;
         case states.indexOf('pause menu'):  // pause menu
@@ -1128,7 +1141,7 @@ function drawCurrentSimBodies() {
         let canvasPos = camera.getCanvasPosition(body);
         let canvasDiameter = camera.getCanvasDiameter(body);
         let minCanvasDiameter = body.getMinCanvasDiameter();
-        if (canvasDiameter < minCanvasDiameter) {
+        if (canvasDiameter < minCanvasDiameter && drawBodyMinCanvasDiamter) {
             canvasDiameter = minCanvasDiameter;
         }
 

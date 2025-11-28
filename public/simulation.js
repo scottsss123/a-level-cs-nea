@@ -174,12 +174,17 @@ class Simulation {
             return;
         }
         for (let i = 0; i < this.#bodies.length; i++) {
+            // add new body position to previous position array and remove oldest position if over 999 elements
+
             let pos = this.#bodies[i].getPos();
 
             if (this.#prevBodyPositions[i].length > 999) {
+                // remove the first element and shift other elements down by one index
                 this.#prevBodyPositions[i].shift();
             }
-            this.#prevBodyPositions[i].push([pos[0], pos[1]]);
+
+            // TODO ALLOW USER TO EDIT THIS
+            if (frameCount % 5 == 0) this.#prevBodyPositions[i].push([pos[0], pos[1]]);
         }
     }
 
@@ -191,7 +196,8 @@ class Simulation {
         this.#time += this.#timeRate;
         
         this.updateBodyVelocities();
-        this.updateBodyPositions();         
+        this.updateBodyPositions();        
+
         this.updatePrevBodyPositions();
         return;
     }
