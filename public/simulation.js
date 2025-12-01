@@ -44,6 +44,9 @@ class Simulation {
     setTime(inTime) {
         this.#time = inTime;
     }
+    simpleSetTimeRate(inTimeRate) {
+        this.#timeRate = inTimeRate;
+    }
     setTimeRate(inTimeRate) {
         this.#prevTimeRate = this.#timeRate;
         this.#timeRate = inTimeRate;
@@ -219,7 +222,7 @@ class Simulation {
                 let pos = cloneSim.getBodies()[j].getPos();
                 this.#futureBodyPositions[j][i] = [pos[0], pos[1]];
             }
-            cloneSim.simpleStep();
+            cloneSim.step();
         }
 
     }
@@ -244,8 +247,8 @@ class Simulation {
         this.updateBodyVelocities();
         this.updateBodyPositions();        
 
-        this.updatePrevBodyPositions();
-        this.updateFutureBodyPositions();
+        //this.updatePrevBodyPositions();
+        //this.updateFutureBodyPositions();
         return;
     }
 

@@ -622,8 +622,7 @@ function draw() {
             break;
         case states.indexOf('main simulation'):  // main simulation
             if (displayBodyPaths) {
-                drawSimulationPrevBodyPositions();
-                drawSimulationFutureBodyPositions();
+                drawBodyPaths();
             }
 
             drawCurrentSimBodies();
@@ -663,7 +662,32 @@ function draw() {
     
 }
 
+function drawBodyPaths() {
+    let currentTimeRate = currentSimulation.getTimeRate();
+    let prevTimeRate = currentSimulation.getPrevTimeRate();
+
+    if (currentTimeRate === 0) {
+        currentTimeRate = -1 * prevTimeRate;
+        currentSimulation.simpleSetTimeRate(currentTimeRate);
+        currentSimulation.updateFutureBodyPositions();
+        drawSimulationFutureBodyPositions();
+        currentSimulation.simpleSetTimeRate(0);
+        currentSimulation.updateFutureBodyPositions();
+
+    } else {
+        currentSimulation.simpleSetTimeRate(currentTimeRate * -1);
+        currentSimulation.updateFutureBodyPositions();
+        drawSimulationFutureBodyPositions();
+        currentSimulation.simpleSetTimeRate(currentTimeRate);
+        currentSimulation.updateFutureBodyPositions();
+    }
+
+    //drawSimulationPrevBodyPositions();
+    drawSimulationFutureBodyPositions();
+}
+
 function drawSimulationPrevBodyPositions() {
+
     // same colourscheme as buttons
     stroke([50,50,200]);
     strokeWeight(1);
