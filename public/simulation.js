@@ -11,6 +11,9 @@ class Simulation {
     #prevBodyPositions; 
     #prevPathInterval;
 
+    #futureBodyPositions;
+    
+
     constructor() {
         this.#camera = new Camera([0,0], 1);
         this.#bodies = [];
@@ -21,6 +24,7 @@ class Simulation {
         this.#focus = false;
         this.#prevBodyPositions = [];
         this.#prevPathInterval = 1;
+        this.#futureBodyPositions = [];
     }
 
 
@@ -66,9 +70,15 @@ class Simulation {
     addBody(inBody) {
         this.#bodies.push(inBody);
         this.#prevBodyPositions.push([]);
+        this.#futureBodyPositions.push([]);
     }
     setPrevTimeRate() {
+        let temp = this.#timeRate;
         this.#timeRate = this.#prevTimeRate;
+        this.#prevTimeRate = temp;
+    }
+    getPrevTimeRate() {
+        return this.#prevTimeRate;
     }
 
     updateBodyPositions() {
@@ -165,6 +175,10 @@ class Simulation {
         return totalMass;
     }
 
+    getPrevBodyPositions() {
+        return this.#prevBodyPositions();
+    }
+
     resetPrevBodyPositions() {
         for (let i = 0; i < this.#prevBodyPositions.length; i++) {
             this.#prevBodyPositions[i] = [];
@@ -190,8 +204,38 @@ class Simulation {
         }
     }
 
+    updateFutureBodyPositions() {
+        this.resetFutureBodyPositions();
+
+        let cloneSim = new Simulation();
+        cloneSim.setData(JSON.stringify(this.getSimulationData()));
+        
+        if (this.#timeRate === 0) {
+            cloneSim.setTimeRate(this.#prevTimeRate);
+        }
+
+        for (let i = 0; i < 999; i++) {
+            for (let j = 0; j < this.#bodies.length; j++) {
+                let pos = cloneSim.getBodies()[j].getPos();
+                this.#futureBodyPositions[j][i] = [pos[0], pos[1]];
+            }
+            cloneSim.simpleStep();
+        }
+
+    }
+
+    resetFutureBodyPositions() {
+        for (let i = 0; i < this.#bodies.length; i++) {
+            this.#futureBodyPositions[i] = [];
+        }
+    }
+
     getPrevBodyPositionsByIndex(index) {
         return this.#prevBodyPositions[index];
+    }
+
+    getFutureBodyPositionsByIndex(index) {
+        return this.#futureBodyPositions[index];
     }
 
     step() {
@@ -201,7 +245,14 @@ class Simulation {
         this.updateBodyPositions();        
 
         this.updatePrevBodyPositions();
+        this.updateFutureBodyPositions();
         return;
+    }
+
+    simpleStep() {
+        this.#time += this.#timeRate;
+        this.updateBodyVelocities();
+        this.updateBodyPositions();
     }
 
     setID(id) {

@@ -415,6 +415,7 @@ function setup() {
         currentSimulation.addBody(new Body('saturn', [-149.6e9 + 1.43e12, 0], [0, 9.69e3], 5.683e26, 1.1647e8, "saturn", [255,255,255]));
         currentSimulation.addBody(new Body('uranus', [-149.6e9 + 2.87e12, 0], [0, 6.835e3], 8.6810e25, 5.0724e7, "uranus", [255,255,255]));
         currentSimulation.addBody(new Body('neptune', [-149.6e9 + 4.5e12, 0], [0, 5.43e3], 1.02409e26, 4.9244e7, "neptune", [255,255,255]));
+        currentSimulation.addBody(new Body('pluto', [-149.6e9 + 7.37593e12, 0], [0, 3.71e3], 1.3e22, 1188.3e3, "mercury", [255,255,255]));
         //currentSimulation.addBody(new Body('ganymede', [-149.6e9 + 7.7841e11 + 1e9, 0], [0, 13.1e3 + 10.9e3], 1.48e23, (2634.1e3) *2, "moon", [255,255,255]));
         //currentSimulation.addBody(new Body('phobos', [-149.6e9 + 2.2794e11 + 9376e3,0], [0,24e3 + 2.138e3], 1.06e16, 22.2e3, "moon", [255,255,255]));
 
@@ -622,6 +623,7 @@ function draw() {
         case states.indexOf('main simulation'):  // main simulation
             if (displayBodyPaths) {
                 drawSimulationPrevBodyPositions();
+                drawSimulationFutureBodyPositions();
             }
 
             drawCurrentSimBodies();
@@ -689,6 +691,33 @@ function drawSimulationPrevBodyPositions() {
     }
 }
 
+function drawSimulationFutureBodyPositions() {
+    // same colourscheme as buttons
+    stroke([50,50,200]);
+    strokeWeight(1);
+
+    let camera = currentSimulation.getCamera();
+
+    if (camera.getRelativeCentre() instanceof Body) {
+        let relativeCentrePos = camera.getRelativeCentre().getPos();
+        let relativeCentreIndex = currentSimulation.getBodyIndexByName(camera.getRelativeCentre().getName());
+
+        for (let i = 0; i < currentSimulation.getBodies().length; i++) { 
+            if (i == relativeCentreIndex) {
+                stroke([25,25,100]);
+                drawBodyFuturePath(camera, i);
+                stroke([50,50,200]);
+            }
+            drawBodyRelativeFuturePath(camera, i, relativeCentrePos, relativeCentreIndex);
+        }
+        return;
+    }
+
+    for (let i = 0; i < currentSimulation.getBodies().length; i++) {
+        drawBodyFuturePath(camera, i);
+    }
+}
+
 function drawBodyRelativePrevPath(camera, bodyIndex, relativeCentrePos, relativeCentreIndex) {
     // cache body and relative centre's previous paths
     let prevBodyPositions = currentSimulation.getPrevBodyPositionsByIndex(bodyIndex);
@@ -724,6 +753,45 @@ function drawBodyPrevPath(camera, bodyIndex) {
         let currPos = prevBodyPositions[j];
         let prevCanvasPos = camera.getSimPointCanvasPosition(prevPos[0], prevPos[1]);
         let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
+        line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
+    }
+}
+
+function drawBodyFuturePath(camera, bodyIndex) {
+    // for each pair of consecutive body positions, draw a line between them
+    let futureBodyPositions = currentSimulation.getFutureBodyPositionsByIndex(bodyIndex);
+    for (let j = 1; j < futureBodyPositions.length; j++) {
+        let prevPos = futureBodyPositions[j-1];
+        let currPos = futureBodyPositions[j];
+        let prevCanvasPos = camera.getSimPointCanvasPosition(prevPos[0], prevPos[1]);
+        let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
+        line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
+    }
+}
+
+function drawBodyRelativeFuturePath(camera, bodyIndex, relativeCentrePos, relativeCentreIndex) {
+    // cache body and relative centre's previous paths
+    let futureBodyPositions = currentSimulation.getFutureBodyPositionsByIndex(bodyIndex);
+    let relCentrePositions = currentSimulation.getFutureBodyPositionsByIndex(relativeCentreIndex);
+
+    // for each pair of consecutive body positions
+    for (let j = 1; j < futureBodyPositions.length; j++) {
+        // calculate the change in position relative to the centre body
+        let bodyPrevPos = relCentrePositions[j-1];
+        let bodyCurrPos = relCentrePositions[j]
+
+        let prevPos = futureBodyPositions[j-1];
+        let currPos = futureBodyPositions[j];
+        
+        let prevDif = [prevPos[0] - bodyPrevPos[0], prevPos[1] - bodyPrevPos[1]];
+        let currDif = [currPos[0] - bodyCurrPos[0], currPos[1] - bodyCurrPos[1]];
+
+        prevPos = [relativeCentrePos[0] + prevDif[0], relativeCentrePos[1] + prevDif[1]];
+        currPos = [relativeCentrePos[0] + currDif[0], relativeCentrePos[1] + currDif[1]];
+
+        let prevCanvasPos = camera.getSimPointCanvasPosition(prevPos[0], prevPos[1]);
+        let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
+        // draw line between difference
         line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
     }
 }
@@ -973,10 +1041,12 @@ function mouseReleased(event) {
                     if (event.ctrlKey) break;
 
                     // check for click on update body popup
-                    // if clicked returns false, linked body is deleted
+                    // if clicked returns false, linked body is deleted TODO  LOG REMOVAL OF PREV PATH
                     if (updateBodyPopupBox !== -1 && updateBodyPopupBox.mouseOverlapping()) {
                         if (!updateBodyPopupBox.clicked(mouseX, mouseY)) {
-                            currentSimulation.getBodies().splice(currentSimulation.getBodies().indexOf(updateBodyPopupBox.getLinkedBody()), 1);
+                            let index = currentSimulation.getBodies().indexOf(updateBodyPopupBox.getLinkedBody());
+                            currentSimulation.getPrevBodyPositions().splice(index, 1)
+                            currentSimulation.getBodies().splice(index, 1);
                         }
                         break;
                     }
@@ -1208,6 +1278,7 @@ function getAverageFrameRate() {
 function drawCurrentSimToolbar() {
     let simTime = currentSimulation.getTime();
     let simTimeRate = currentSimulation.getTimeRate();
+    let simPrevTimeRate = currentSimulation.getPrevTimeRate();
     let camera = currentSimulation.getCamera();
     let relativeCentre = camera.getRelativeCentre();
     let cameraPos = camera.getPos();
@@ -1234,7 +1305,7 @@ function drawCurrentSimToolbar() {
 
     drawToolbar();
     drawToolbarIcons();
-    timeRateTextBox.updateContents("x"+(simTimeRate * averageFrameRate).toPrecision(3));
+    timeRateTextBox.updateContents("x"+(simTimeRate * averageFrameRate).toPrecision(3) + " (x" + (simPrevTimeRate * averageFrameRate).toPrecision(3) + ")");
     timeTextBox.updateContents(secondsToDisplayTime(simTime)); 
     camZoomTextBox.updateContents("x"+cameraZoom.toPrecision(3));
     camPosTextBox.updateContents("( " + displayCameraPos[0].toPrecision(3) + " (m) , " + displayCameraPos[1].toPrecision(3) + "(m) ) ( " + modPos.toPrecision(3) + " (m), " + argPos.toPrecision(3) + " (°) )");
@@ -1302,7 +1373,7 @@ function mouseWheel(event) {
                         currentTimeRate = signFlipThreshold;
                     }
                 }
-                if (currentTimeRate > 0) {
+                if (currentTimeRate > 0) { //TODO EDIT PREV TIME RATE WHEN PAUSED
                     if (zoomIn) { // scroll down 
                         if (currentTimeRate < signFlipThreshold) {
                             currentSimulation.setTimeRate(-1 * currentTimeRate);
