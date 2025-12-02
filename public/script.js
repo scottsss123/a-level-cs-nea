@@ -1058,7 +1058,7 @@ function mouseReleased(event) {
                         break;
                     }
                     if (playIcon.mouseOverlapping() && currentSimulation.getTimeRate() === 0) {
-                        currentSimulation.setPrevTimeRate();
+                        currentSimulation.swapTimeRate();
                         break;
                     }
 
@@ -1158,7 +1158,7 @@ function keyPressed() {
                     if (currentSimulation.getTimeRate() !== 0) {
                         currentSimulation.setTimeRate(0);
                     } else {
-                        currentSimulation.setPrevTimeRate();
+                        currentSimulation.swapTimeRate();
                     }
                     break;
                 case 70: //f
@@ -1177,6 +1177,7 @@ function keyPressed() {
                     infoPopupBoxes = [];
                     updateBodyPopupBox = -1;
                     currentSimulation.resetPrevBodyPositions();
+                    //TODO SAME FOR FUTURE
                     break;
                 case 82: //r -> set relative position
                     let cursorOverlapsBody = false;
@@ -1391,11 +1392,17 @@ function mouseWheel(event) {
             let currentTimeRate = currentSimulation.getTimeRate();
             if (timeRateTextBox.mouseOverlapping()) { 
                 if (currentTimeRate === 0) {
+                    if (keyIsDown('control')) //TODO
+
+
                     if (zoomIn) {
-                        currentTimeRate = -1 * signFlipThreshold;
+                        console.log('test');
+
+                        currentSimulation.setPrevTimeRate(downFactor * currentSimulation.getPrevTimeRate());
                     } else {
-                        currentTimeRate = signFlipThreshold;
+                        currentSimulation.setPrevTimeRate(upFactor * currentSimulation.getPrevTimeRate());
                     }
+                    return
                 }
                 if (currentTimeRate > 0) { //TODO EDIT PREV TIME RATE WHEN PAUSED
                     if (zoomIn) { // scroll down 

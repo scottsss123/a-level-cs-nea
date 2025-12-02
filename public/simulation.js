@@ -75,10 +75,13 @@ class Simulation {
         this.#prevBodyPositions.push([]);
         this.#futureBodyPositions.push([]);
     }
-    setPrevTimeRate() {
+    swapTimeRate() {
         let temp = this.#timeRate;
         this.#timeRate = this.#prevTimeRate;
         this.#prevTimeRate = temp;
+    }
+    setPrevTimeRate(inTimeRate) {
+        this.#prevTimeRate = inTimeRate;
     }
     getPrevTimeRate() {
         return this.#prevTimeRate;
