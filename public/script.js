@@ -1392,7 +1392,14 @@ function mouseWheel(event) {
             let currentTimeRate = currentSimulation.getTimeRate();
             if (timeRateTextBox.mouseOverlapping()) { 
                 if (currentTimeRate === 0) {
-                    if (keyIsDown('control')) //TODO
+                    if (keyIsDown('control'))  {
+                        if (zoomIn) {
+                            currentSimulation.setTimeRate(-1 * signFlipThreshold);
+                        } else {
+                            currentSimulation.setTimeRate(signFlipThreshold);
+                        }
+                        return;
+                    }
 
 
                     if (zoomIn) {
