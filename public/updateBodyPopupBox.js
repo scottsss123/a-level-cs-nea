@@ -119,7 +119,7 @@ class UpdateBodyPopupBox extends Box {
 
     changeVelocity() {
         let relativeCentre = this.#linkedCamera.getRelativeCentre();
-        console.log("change vel rel centre vel:", relativeCentre.getVel());
+        //console.log("change vel rel centre vel:", relativeCentre.getVel());
 
         // prompt the user for a new body speed, with current unit
         let userInput = prompt('Enter new body speed ( leave blank to keep same speed ) ( ' + this.#displaySpeedUnit + ' ) (= ' + (1/speedUnits[this.#displaySpeedUnit]).toPrecision(3) + 'm/s )');

@@ -282,7 +282,7 @@ class Simulation {
             focus = false;
         }
 
-        return {
+        let data = {
             // incorporate new relative centre
             bodies: bodyArr, 
             camera: this.#camera.getCameraData(),
@@ -291,8 +291,10 @@ class Simulation {
             prevTimeRate: this.#prevTimeRate,
             G: this.#G,  
             focus: focus, 
-            id: this.#id
+            id: this.#id,
         }
+
+        return data;
     }
 
     setData(simulationDataString) {

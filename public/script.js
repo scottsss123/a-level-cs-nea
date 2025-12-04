@@ -60,6 +60,8 @@ let displayBodyPaths = false;
 let drawBackgroundImage = true;
 let drawBodyMinCanvasDiamter = true;
 
+let drawPathValue = 0;
+
 // executed before setup to load assets in more modular way
 function preload() {
     loadFont("./assets/monoMMM_5.ttf");
@@ -621,10 +623,7 @@ function draw() {
         case states.indexOf('main menu'):  // main menu
             break;
         case states.indexOf('main simulation'):  // main simulation
-            if (displayBodyPaths) {
-                drawBodyPaths();
-            }
-
+            drawBodyPaths();
             drawCurrentSimBodies();
             drawCurrentSimToolbar();
             drawInfoPopupBoxes();
@@ -662,28 +661,37 @@ function draw() {
     
 }
 
-function drawBodyPaths() {
-    let currentTimeRate = currentSimulation.getTimeRate();
-    let prevTimeRate = currentSimulation.getPrevTimeRate();
+function drawBodyPaths() { // TODO TOGGLE BETWEEEN 
+    currentSimulation.updatePrevBodyPositions();
+    switch (drawPathValue) {
+    case 0:  // draw no body paths
+        break;
+    case 1:  // draw body predicted future and previous path
+        let currentTimeRate = currentSimulation.getTimeRate();
+        let prevTimeRate = currentSimulation.getPrevTimeRate();
 
-    if (currentTimeRate === 0) {
-        currentTimeRate = -1 * prevTimeRate;
-        currentSimulation.simpleSetTimeRate(currentTimeRate);
-        currentSimulation.updateFutureBodyPositions();
+        if (currentTimeRate === 0) {
+            currentTimeRate = -1 * prevTimeRate;
+            currentSimulation.simpleSetTimeRate(currentTimeRate);
+            currentSimulation.updateFutureBodyPositions();
+            drawSimulationFutureBodyPositions();
+            currentSimulation.simpleSetTimeRate(0);
+            currentSimulation.updateFutureBodyPositions();
+
+        } else {
+            currentSimulation.simpleSetTimeRate(currentTimeRate * -1);
+            currentSimulation.updateFutureBodyPositions();
+            drawSimulationFutureBodyPositions();
+            currentSimulation.simpleSetTimeRate(currentTimeRate);
+            currentSimulation.updateFutureBodyPositions();
+        }
+
         drawSimulationFutureBodyPositions();
-        currentSimulation.simpleSetTimeRate(0);
-        currentSimulation.updateFutureBodyPositions();
-
-    } else {
-        currentSimulation.simpleSetTimeRate(currentTimeRate * -1);
-        currentSimulation.updateFutureBodyPositions();
-        drawSimulationFutureBodyPositions();
-        currentSimulation.simpleSetTimeRate(currentTimeRate);
-        currentSimulation.updateFutureBodyPositions();
-    }
-
-    //drawSimulationPrevBodyPositions();
-    drawSimulationFutureBodyPositions();
+        break;
+    case 2:  // draw body previous path
+        drawSimulationPrevBodyPositions();
+        break;
+    }    
 }
 
 function drawSimulationPrevBodyPositions() {
@@ -1177,6 +1185,10 @@ function keyPressed() {
                     infoPopupBoxes = [];
                     updateBodyPopupBox = -1;
                     currentSimulation.resetPrevBodyPositions();
+                    currentSimulation.resetFutureBodyPositions();
+                    if (currentSimulation.getCamera().getRelativeCentre() instanceof Body) {
+                        currentSimulation.getCamera().setRelativeCentre(currentSimulation.getBodyByName(currentSimulation.getCamera().getRelativeCentre().getName()));
+                    }
                     //TODO SAME FOR FUTURE
                     break;
                 case 82: //r -> set relative position
@@ -1193,7 +1205,15 @@ function keyPressed() {
                     }
                     break;
                 case 84: //t -> toggle display body paths
-                    displayBodyPaths = displayBodyPaths ? false : true;
+                    switch (drawPathValue) {
+                        case 0:
+                        case 1:
+                            drawPathValue++;
+                            break;
+                        case 2:
+                            drawPathValue = 0;
+                            break;
+                    }
                     break;
                 case 78: //n -> toggle body min canvas diameter
                     drawBodyMinCanvasDiamter = drawBodyMinCanvasDiamter ? false : true;
