@@ -122,7 +122,7 @@ class Simulation {
         return this.#focus;
     }
 
-    updateBodyVelocities() {
+    updateBodyVelocities() { //TODO RK4
         // for each pair of bodies, bodyi, bodyj
         for (let i = 0; i < this.#bodies.length; i++) {
             for (let j = i + 1; j < this.#bodies.length; j++) {
@@ -161,7 +161,7 @@ class Simulation {
         }
     }
 
-    getCentreOfMassPosition() { /////////////////////////////////TODO
+    getCentreOfMassPosition() {
         let pos = [0,0];
         let reciprocalOftotalMass = 1 / this.getTotalMass();
         for (let body of this.#bodies) {
@@ -205,8 +205,7 @@ class Simulation {
                 this.#prevBodyPositions[i].shift();
             }
 
-            // TODO ALLOW USER TO EDIT THIS
-            if (frameCount % this.#prevPathInterval == 0) this.#prevBodyPositions[i].push([pos[0], pos[1]]);
+            this.#prevBodyPositions[i].push([pos[0], pos[1]]);
         }
     }
 
@@ -244,21 +243,44 @@ class Simulation {
         return this.#futureBodyPositions[index];
     }
 
+    handleCollisions() { // TODO LOG THIS IMPLEMENTATION & CRASH WHEN FUTURE PATH INTERSECTS BODY
+        let bodies = this.#bodies;
+        for (let i = 0; i < bodies.length; i++) {
+            for (let j = i + 1; j < bodies.length; j++) {
+                let body1 = bodies[i];
+                let body2 = bodies[j];
+
+                if (currentSimulation.getCamera().bodiesOverlap(body1, body2)) {
+                    console.log(body1.getName() +"overlaps"+body2.getName());
+                    
+                    let mass1 = body1.getMass();
+                    let mass2 = body2.getMass();
+
+                    let survivingBody;
+                    if (mass1 > mass2) {
+                        survivingBody = body1;
+                        this.#prevBodyPositions.splice(j, 1)
+                        this.#bodies.splice(j, 1);
+                    } else {
+                        survivingBody = body2;
+                        this.#prevBodyPositions.splice(i, 1)
+                        this.#bodies.splice(i, 1);
+                    }
+                }
+            }
+        }
+    }
+
     step() {
         this.#time += this.#timeRate;
         
         this.updateBodyVelocities();
         this.updateBodyPositions();        
+        this.handleCollisions();
 
         //this.updatePrevBodyPositions();
         //this.updateFutureBodyPositions();
         return;
-    }
-
-    simpleStep() {
-        this.#time += this.#timeRate;
-        this.updateBodyVelocities();
-        this.updateBodyPositions();
     }
 
     setID(id) {

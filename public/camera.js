@@ -87,6 +87,22 @@ class Camera {
         return false;
     }
 
+    bodiesOverlap(body1, body2) {  
+        let pos1 = this.getCanvasPosition(body1);
+        let pos2 = this.getCanvasPosition(body2);
+
+        let dist = Math.sqrt(((pos2[0] - pos1[0])**2) + ((pos2[1] - pos1[1])**2));
+        let r1 = this.getCanvasDiameter(body1) / 2;
+        let r2 = this.getCanvasDiameter(body2) / 2;
+        let maxR = max(r1, r2);
+
+        if (maxR >= dist) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     resetFocusOffset() {
         this.#focusOffset = [0,0];
     }

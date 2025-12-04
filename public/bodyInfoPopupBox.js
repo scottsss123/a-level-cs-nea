@@ -56,8 +56,6 @@ class BodyInfoPopupBox extends TextBox {
        
     }
 
-
-    /// TODO: convert units & maybe comment more in doc
     updateBodyInfo() {
         let relativeCentre = this.#linkedCamera.getRelativeCentre();
 

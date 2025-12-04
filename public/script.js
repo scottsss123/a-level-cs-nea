@@ -661,7 +661,7 @@ function draw() {
     
 }
 
-function drawBodyPaths() { // TODO TOGGLE BETWEEEN 
+function drawBodyPaths() { 
     currentSimulation.updatePrevBodyPositions();
     switch (drawPathValue) {
     case 0:  // draw no body paths
@@ -1073,7 +1073,7 @@ function mouseReleased(event) {
                     if (event.ctrlKey) break;
 
                     // check for click on update body popup
-                    // if clicked returns false, linked body is deleted TODO  LOG REMOVAL OF PREV PATH
+                    // if clicked returns false, linked body is deleted
                     if (updateBodyPopupBox !== -1 && updateBodyPopupBox.mouseOverlapping()) {
                         if (!updateBodyPopupBox.clicked(mouseX, mouseY)) {
                             let index = currentSimulation.getBodies().indexOf(updateBodyPopupBox.getLinkedBody());
@@ -1189,7 +1189,6 @@ function keyPressed() {
                     if (currentSimulation.getCamera().getRelativeCentre() instanceof Body) {
                         currentSimulation.getCamera().setRelativeCentre(currentSimulation.getBodyByName(currentSimulation.getCamera().getRelativeCentre().getName()));
                     }
-                    //TODO SAME FOR FUTURE
                     break;
                 case 82: //r -> set relative position
                     let cursorOverlapsBody = false;
@@ -1320,6 +1319,10 @@ function getAverageFrameRate() {
     return mean;
 }
 
+function drawScaleBar(c) {
+    
+}
+
 function drawCurrentSimToolbar() {
     let simTime = currentSimulation.getTime();
     let simTimeRate = currentSimulation.getTimeRate();
@@ -1350,6 +1353,7 @@ function drawCurrentSimToolbar() {
 
     drawToolbar();
     drawToolbarIcons();
+    drawScaleBar(camera);
     timeRateTextBox.updateContents("x"+(simTimeRate * averageFrameRate).toPrecision(3) + " (x" + (simPrevTimeRate * averageFrameRate).toPrecision(3) + ")");
     timeTextBox.updateContents(secondsToDisplayTime(simTime)); 
     camZoomTextBox.updateContents("x"+cameraZoom.toPrecision(3));
@@ -1359,7 +1363,7 @@ function drawCurrentSimToolbar() {
 
 function mainSimKeyHeldHandler() {
     let zoomFactor = 1 / currentSimulation.getCamera().getZoom();
-    //TODO:variable cam speed
+   
     if (keyIsDown('d') || keyIsDown(RIGHT_ARROW)) {
         if (currentSimulation.getFocus())
             currentSimulation.getCamera().updateFocusOffset([defaultCamSpeed * zoomFactor,0]);
@@ -1431,7 +1435,7 @@ function mouseWheel(event) {
                     }
                     return
                 }
-                if (currentTimeRate > 0) { //TODO EDIT PREV TIME RATE WHEN PAUSED
+                if (currentTimeRate > 0) { 
                     if (zoomIn) { // scroll down 
                         if (currentTimeRate < signFlipThreshold) {
                             currentSimulation.setTimeRate(-1 * currentTimeRate);
