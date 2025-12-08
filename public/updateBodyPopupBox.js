@@ -86,7 +86,7 @@ class UpdateBodyPopupBox extends Box {
         // prompt the user for a new body mass, with the current unit 
         let userInput = prompt('Enter new body mass ( ' + this.#displayMassUnit + ' ) (= ' + (1/massUnits[this.#displayMassUnit]).toPrecision(3) + 'kg )');
         // return / break out of method if user enters invalid answer e.g non-numeric
-        if (!userInput || userInput < 0 || parseFloat(userInput) === undefined) {
+        if (!userInput || isNaN(userInput)) {
             return true;
         }
         // convert user input to float and standard unit
@@ -124,6 +124,11 @@ class UpdateBodyPopupBox extends Box {
         // prompt the user for a new body speed, with current unit
         let userInput = prompt('Enter new body speed ( leave blank to keep same speed ) ( ' + this.#displaySpeedUnit + ' ) (= ' + (1/speedUnits[this.#displaySpeedUnit]).toPrecision(3) + 'm/s )');
         
+        if (!isNaN(userInput) && parseFloat(userInput) == 0) {
+            this.#linkedBody.setVel([0,0]);
+            return;
+        }
+
         let newVel = [];
         
         // calculate current speed and direction of linked body

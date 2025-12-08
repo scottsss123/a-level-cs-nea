@@ -1077,7 +1077,7 @@ function mouseReleased(event) {
                     if (updateBodyPopupBox !== -1 && updateBodyPopupBox.mouseOverlapping()) {
                         if (!updateBodyPopupBox.clicked(mouseX, mouseY)) {
                             let index = currentSimulation.getBodies().indexOf(updateBodyPopupBox.getLinkedBody());
-                            currentSimulation.getPrevBodyPositions().splice(index, 1)
+                            currentSimulation.removePrevBodyPositions(index);
                             currentSimulation.getBodies().splice(index, 1);
                         }
                         break;
@@ -1131,7 +1131,12 @@ function mouseReleased(event) {
 
                     // create new body if cursor doesn't overlap body and control and alt keys are held
                     if (!overlappingBody && event.altKey) {
-                        newBodyNumber++;
+                        let validNewBodyNumber = false;
+                        while (!validNewBodyNumber) {
+                            if (!currentSimulation.getBodyByName('body ' + newBodyNumber)) break;
+                            newBodyNumber++;
+                        }
+
                         let newBodyName = 'body ' + newBodyNumber;
                         currentSimulation.addBody(new Body(newBodyName, currentSimulation.getCamera().getCursorSimPosition(mouseX,mouseY), [0,0], 0, 0, 'none', [random(255), random(255), random(255)]));
                         updateBodyPopupBox = new UpdateBodyPopupBox(mouseX, mouseY, 400, 250, currentSimulation.getBodyByName(newBodyName), currentSimulation.getCamera(), displayMassUnit, displaySpeedUnit, displayDistanceUnit);
@@ -1321,6 +1326,10 @@ function getAverageFrameRate() {
 
 function drawScaleBar(c) {
     
+}
+
+function calculateMaxNewBodyNumber() { // TODO PREVENT NEW BODIES IN LOADED SIMULATIONS BEING GIVEN SAME NAME 
+
 }
 
 function drawCurrentSimToolbar() {

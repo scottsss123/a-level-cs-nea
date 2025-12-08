@@ -43,6 +43,10 @@ class Body {
     getMinCanvasDiameter() {
         return this.#minCanvasDiameter;
     }
+    getSpeed() {
+        let v = this.#vel;
+        return Math.sqrt(v[0]**2 + v[1]**2);
+    }
     
 
     setName(inName) {
@@ -67,6 +71,9 @@ class Body {
     }
     setMinCanvasDiameter(inMinCanvasDiameter) {
         this.#minCanvasDiameter = inMinCanvasDiameter;
+    }
+    addMass(inMass) {
+        this.#mass += inMass;
     }
     
 

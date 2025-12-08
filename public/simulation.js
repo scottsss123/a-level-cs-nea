@@ -182,7 +182,11 @@ class Simulation {
     }
 
     getPrevBodyPositions() {
-        return this.#prevBodyPositions();
+        return this.#prevBodyPositions;
+    }
+
+    removePrevBodyPositions(index) {
+        this.#prevBodyPositions.splice(index, 1);
     }
 
     resetPrevBodyPositions() {
@@ -224,7 +228,7 @@ class Simulation {
                 let pos = cloneSim.getBodies()[j].getPos();
                 this.#futureBodyPositions[j][i] = [pos[0], pos[1]];
             }
-            cloneSim.step();
+            cloneSim.simpleStep();
         }
 
     }
@@ -243,7 +247,7 @@ class Simulation {
         return this.#futureBodyPositions[index];
     }
 
-    handleCollisions() { // TODO LOG THIS IMPLEMENTATION & CRASH WHEN FUTURE PATH INTERSECTS BODY
+    handleCollisions() { // TODO FIX PHYSICS HERE
         let bodies = this.#bodies;
         for (let i = 0; i < bodies.length; i++) {
             for (let j = i + 1; j < bodies.length; j++) {
@@ -257,15 +261,38 @@ class Simulation {
                     let mass2 = body2.getMass();
 
                     let survivingBody;
+                    let dyingBody;
                     if (mass1 > mass2) {
                         survivingBody = body1;
-                        this.#prevBodyPositions.splice(j, 1)
-                        this.#bodies.splice(j, 1);
+                        dyingBody = body2;
                     } else {
                         survivingBody = body2;
-                        this.#prevBodyPositions.splice(i, 1)
-                        this.#bodies.splice(i, 1);
+                        dyingBody = body1;
                     }
+
+                    console.log('i:', survivingBody.getSpeed())
+
+                    // add less massive body's momentum to more massive body
+                    let dyingMass = dyingBody.getMass();
+                    let dyingVel = dyingBody.getVel();
+                    let dyingMomentum = [dyingVel[0] * dyingMass, dyingVel[1] * dyingMass];
+
+                    let survivingMass = survivingBody.getMass();
+                    let survivingVel = survivingBody.getVel();
+                    let survivingMomentum = [survivingVel[0] * survivingMass, survivingVel[1] * survivingMass];
+
+                    survivingBody.addMass(dyingMass);
+
+                    let finalMomentum = [dyingMomentum[0] + survivingMomentum[0], dyingMomentum[1] + survivingMomentum[1]];
+                    let finalVel = [finalMomentum[0] / survivingMass, finalMomentum[1] / survivingMass];
+
+                    survivingBody.setVel(finalVel);
+
+                    // remove less massive body
+                    this.#prevBodyPositions.splice(j, 1)
+                    this.#bodies.splice(j, 1);                     
+                    
+                    console.log('f:', survivingBody.getSpeed())
                 }
             }
         }
@@ -281,6 +308,13 @@ class Simulation {
         //this.updatePrevBodyPositions();
         //this.updateFutureBodyPositions();
         return;
+    }
+
+    simpleStep() {
+        this.#time += this.#timeRate;
+        
+        this.updateBodyVelocities();
+        this.updateBodyPositions(); 
     }
 
     setID(id) {
