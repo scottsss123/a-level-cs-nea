@@ -57,7 +57,6 @@ class Simulation {
             this.#focus = newFocus;
         } else {
             // reset simulation focus if nothing inputted into prompt
-            console.log('no body of given name - setFocusByName');
             this.#focus = false;
         }
     }
@@ -111,11 +110,9 @@ class Simulation {
     }
     moveCameraToFocus() {
         if (!this.#focus) { 
-            //console.log('no focus');
             return; 
         }
         let focusPos = this.#focus.getPos();
-        // console.log(this.#focus);
         this.#camera.setPosition(focusPos);
     }
     getFocus() {
@@ -249,28 +246,31 @@ class Simulation {
 
     handleCollisions() { // TODO FIX PHYSICS HERE
         let bodies = this.#bodies;
+        let destroyedIndices = [];
         for (let i = 0; i < bodies.length; i++) {
+            if (destroyedIndices.includes(i)) continue;
             for (let j = i + 1; j < bodies.length; j++) {
+                if (destroyedIndices.includes(j)) continue;
                 let body1 = bodies[i];
                 let body2 = bodies[j];
 
-                if (currentSimulation.getCamera().bodiesOverlap(body1, body2)) {
-                    console.log(body1.getName() +"overlaps"+body2.getName());
-                    
+                if (currentSimulation.getCamera().bodiesOverlap(body1, body2)) {                  
                     let mass1 = body1.getMass();
                     let mass2 = body2.getMass();
 
                     let survivingBody;
                     let dyingBody;
+                    let dyingBodyIndex;
                     if (mass1 > mass2) {
                         survivingBody = body1;
                         dyingBody = body2;
+                        dyingBodyIndex = j;
                     } else {
                         survivingBody = body2;
                         dyingBody = body1;
+                        dyingBodyIndex = i;
                     }
-
-                    console.log('i:', survivingBody.getSpeed())
+                    destroyedIndices.push(dyingBodyIndex);
 
                     // add less massive body's momentum to more massive body
                     let dyingMass = dyingBody.getMass();
@@ -282,6 +282,7 @@ class Simulation {
                     let survivingMomentum = [survivingVel[0] * survivingMass, survivingVel[1] * survivingMass];
 
                     survivingBody.addMass(dyingMass);
+                    survivingMass += dyingMass;
 
                     let finalMomentum = [dyingMomentum[0] + survivingMomentum[0], dyingMomentum[1] + survivingMomentum[1]];
                     let finalVel = [finalMomentum[0] / survivingMass, finalMomentum[1] / survivingMass];
@@ -289,10 +290,9 @@ class Simulation {
                     survivingBody.setVel(finalVel);
 
                     // remove less massive body
-                    this.#prevBodyPositions.splice(j, 1)
-                    this.#bodies.splice(j, 1);                     
                     
-                    console.log('f:', survivingBody.getSpeed())
+                    this.#prevBodyPositions.splice(dyingBodyIndex, 1)
+                    this.#bodies.splice(dyingBodyIndex, 1);                     
                 }
             }
         }
@@ -300,10 +300,9 @@ class Simulation {
 
     step() {
         this.#time += this.#timeRate;
-        
+       
         this.updateBodyVelocities();
-        this.updateBodyPositions();        
-        this.handleCollisions();
+        this.updateBodyPositions();           
 
         //this.updatePrevBodyPositions();
         //this.updateFutureBodyPositions();

@@ -72,10 +72,16 @@ class Camera {
         return this.#relativeCentre;
     }
 
+    getSimDistance(canvasDistance) {
+        let b = this.getCursorSimPosition(canvasDistance, 0)[0];
+        let a = this.getCursorSimPosition(0,0)[0];
+        return Math.abs(b-a);
+    }
+
     mouseOverlapsBody(body, mousePosition) {
         // cache body's position and radius on canvas
         let bodyCanvasPosition = this.getCanvasPosition(body);
-        let bodyRadius = this.getCanvasDiameter(body);
+        let bodyRadius = this.getCanvasDiameter(body) / 2;
         // calculate distance "radius" between center of body and mouse cursor
         let radius = Math.sqrt((bodyCanvasPosition[0]-mousePosition[0])**2 + ((bodyCanvasPosition[1]-mousePosition[1])**2));
         
@@ -88,7 +94,20 @@ class Camera {
     }
 
     bodiesOverlap(body1, body2) {  
-        return this.mouseOverlapsBody(body1, this.getCanvasPosition(body2));
+        // calculate toptal radius
+        let bodyPosition1 = body1.getPos();
+        let bodyPosition2 = body2.getPos();
+        let r1 = body1.getDiameter();
+        let r2 = body2.getDiameter();
+        let rTotal = r1 + r2;
+        // calculate distance "radius" between center of bodies
+        let radius = Math.sqrt((bodyPosition1[0]-bodyPosition2[0])**2 + ((bodyPosition1[1]-bodyPosition2[1])**2));
+        
+        // return true if overlap
+        if (radius <= rTotal) {
+            return true;
+        }
+        return false;
     }
 
     resetFocusOffset() {

@@ -628,6 +628,7 @@ function draw() {
             drawCurrentSimToolbar();
             drawInfoPopupBoxes();
             drawUpdateBodyPopupBox();
+            if (currentlyDragging === -1) currentSimulation.handleCollisions();
             break;
         case states.indexOf('learn menu'):  // learn menu
             break;
@@ -736,6 +737,7 @@ function drawSimulationFutureBodyPositions() {
 
         for (let i = 0; i < currentSimulation.getBodies().length; i++) { 
             if (i == relativeCentreIndex) {
+                continue;
                 stroke([25,25,100]);
                 drawBodyFuturePath(camera, i);
                 stroke([50,50,200]);
@@ -758,6 +760,7 @@ function drawBodyRelativePrevPath(camera, bodyIndex, relativeCentrePos, relative
     // for each pair of consecutive body positions
     for (let j = 1; j < prevBodyPositions.length; j++) {
         // calculate the change in position relative to the centre body
+        //if (!relCentrePositions[j-1] || !relCentrePositions[j]) continue; 
         let bodyPrevPos = relCentrePositions[j-1];
         let bodyCurrPos = relCentrePositions[j]
 
@@ -1280,6 +1283,8 @@ function drawCurrentSimBodies() {
         } else {
             let img = bodyImages[bodyImage];
             image(img, canvasPos[0], canvasPos[1], canvasDiameter, canvasDiameter);
+            noFill();
+            circle(canvasPos[0], canvasPos[1], canvasDiameter);
         }
 
         if (currentlyDragging instanceof Body && currentlyDragging === body) {
@@ -1436,8 +1441,6 @@ function mouseWheel(event) {
 
 
                     if (zoomIn) {
-                        console.log('test');
-
                         currentSimulation.setPrevTimeRate(downFactor * currentSimulation.getPrevTimeRate());
                     } else {
                         currentSimulation.setPrevTimeRate(upFactor * currentSimulation.getPrevTimeRate());
