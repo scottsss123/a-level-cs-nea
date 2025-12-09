@@ -27,7 +27,6 @@ class TextBox extends Box {
     display() {
         // display box
         if (this.#displayBox) {
-            stroke('white');
             super.display();
         }
 

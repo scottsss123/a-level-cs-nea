@@ -87,24 +87,25 @@ class Camera {
         
         // return true if cursor overlaps body
         if (radius <= bodyRadius || radius <= body.getMinCanvasDiameter()) {
-            console.log(body.getName(), "overlaps cursor");
             return true;
         }
         return false;
     }
 
     bodiesOverlap(body1, body2) {  
+
         // calculate toptal radius
         let bodyPosition1 = body1.getPos();
         let bodyPosition2 = body2.getPos();
-        let r1 = body1.getDiameter();
-        let r2 = body2.getDiameter();
+        let r1 = body1.getDiameter() / 2;
+        let r2 = body2.getDiameter() / 2;
         let rTotal = r1 + r2;
         // calculate distance "radius" between center of bodies
         let radius = Math.sqrt((bodyPosition1[0]-bodyPosition2[0])**2 + ((bodyPosition1[1]-bodyPosition2[1])**2));
         
         // return true if overlap
         if (radius <= rTotal) {
+            console.log('bodies overlap');
             return true;
         }
         return false;

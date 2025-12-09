@@ -36,19 +36,29 @@ class UpdateBodyPopupBox extends Box {
         // draw line to linked body
         let pos = this.getPos();
         let bodyCanvasPos = this.#linkedCamera.getCanvasPosition(this.#linkedBody);
-        stroke('white');
-        strokeWeight (1);
+ 
+        strokeWeight(2);
+        stroke([255,255,255]);
+
         line(pos[0] , pos[1], bodyCanvasPos[0], bodyCanvasPos[1]);
-        
+
+        strokeWeight(2);
+        if (this.mouseOverlapping()) { 
+            strokeWeight(4);
+        }
+
         if (this === currentlyDragging) {
-            strokeWeight (2)
+            stroke([255, 255, 150])
+        } else {
+            stroke([255,255,255]);
         }
 
         // draw box
         super.display();
-        
+
+        strokeWeight(2);
+
         // draw button lines
-        stroke('white');
         line(this.leftX, this.underNameLineY, this.rightX, this.underNameLineY);
         line(this.leftX, this.underMassLineY, this.rightX, this.underMassLineY);
         line(this.leftX, this.underDiameterLineY, this.rightX, this.underDiameterLineY);

@@ -32,7 +32,7 @@ let iconWidth = 32;
 let iconHeight = 32;
 let icons = [];
 // toolbar textBox setup
-let timeRateTextBox, timeTextBox, camPosTextBox, camZoomTextBox;
+let timeRateTextBox, timeTextBox, camPosTextBox, camZoomTextBox, scaleBarTextbox;
 let infoPopupBoxes = [];
 
 let displayDistanceUnit = 'm';
@@ -381,7 +381,9 @@ function setup() {
         camZoomTextBox.toggleDisplayBox();
         camPosTextBox = new TextBox(1 * width / 2 + 5 * iconWidth, height - (mainButtonHeight /2) - (0.5* textLeading()), width/2, mainButtonHeight/4, '');
         camPosTextBox.toggleDisplayBox();
-        let mainSimulationTextBoxes = [timeRateTextBox, timeTextBox, camZoomTextBox, camPosTextBox];
+        scaleBarTextbox = new TextBox(width / 3, height - mainButtonHeight/2- 0.5*textLeading(), width/2, mainButtonHeight/4, '');
+        scaleBarTextbox.toggleDisplayBox();
+        let mainSimulationTextBoxes = [timeRateTextBox, timeTextBox, camZoomTextBox, camPosTextBox, scaleBarTextbox];
     
 
         let simulationTutorialTextBoxes = [];
@@ -622,6 +624,7 @@ function draw() {
     switch (state) {
         case states.indexOf('main menu'):  // main menu
             break;
+        case states.indexOf('pause menu'):  // pause menu
         case states.indexOf('main simulation'):  // main simulation
             drawBodyPaths();
             drawCurrentSimBodies();
@@ -629,18 +632,8 @@ function draw() {
             drawInfoPopupBoxes();
             drawUpdateBodyPopupBox();
             if (currentlyDragging === -1) currentSimulation.handleCollisions();
-            break;
+            break;        
         case states.indexOf('learn menu'):  // learn menu
-            break;
-        case states.indexOf('pause menu'):  // pause menu
-            if (displayBodyPaths) {
-                drawSimulationPrevBodyPositions();
-            }
-            drawCurrentSimBodies();
-            // possible bodge {
-            drawCurrentSimToolbar();
-            timeRateTextBox.display();
-            // } not necessary to have but i think looks nice
             break;
         case states.indexOf('my simulations menu'):
             drawSavedSimulationsBoxes();
@@ -654,6 +647,8 @@ function draw() {
 
     // display elements of current state
 
+    stroke([50,50,200]);
+    strokeWeight(2);
     drawButtons();
     drawTextBoxes();
     drawCurrentState();
@@ -776,7 +771,7 @@ function drawBodyRelativePrevPath(camera, bodyIndex, relativeCentrePos, relative
         let prevCanvasPos = camera.getSimPointCanvasPosition(prevPos[0], prevPos[1]);
         let currCanvasPos = camera.getSimPointCanvasPosition(currPos[0], currPos[1]);
         // draw line between difference
-        line (prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
+        line(prevCanvasPos[0], prevCanvasPos[1], currCanvasPos[0], currCanvasPos[1]);
     }
 }
 
@@ -864,13 +859,17 @@ function updateSavedSimulationDescriptionBoxes(userSimulationMetaDatas) {
 }
 
 function drawSavedSimulationsBoxes() {
+    strokeWeight(2);
     for (let savedSimulationDescriptionBox of savedSimulationDescriptionBoxes) {
+        stroke('white');
         savedSimulationDescriptionBox.display();
     }
 }
 
 function drawPublicSimulationsBoxes() {
+    strokeWeight(2);
     for (let publicSimulationDescriptionBox of publicSimulationDescriptionBoxes) {
+        stroke('white');
         publicSimulationDescriptionBox.display();
     }
 }
@@ -1283,14 +1282,18 @@ function drawCurrentSimBodies() {
         } else {
             let img = bodyImages[bodyImage];
             image(img, canvasPos[0], canvasPos[1], canvasDiameter, canvasDiameter);
-            noFill();
-            circle(canvasPos[0], canvasPos[1], canvasDiameter);
+            if (camera.mouseOverlapsBody(body, [mouseX, mouseY])) {
+                noFill();
+                stroke([50,50,200])
+                strokeWeight(2);
+                circle(canvasPos[0], canvasPos[1], canvasDiameter + 6);
+            }
         }
 
         if (currentlyDragging instanceof Body && currentlyDragging === body) {
             noFill();
             stroke (255, 255, 150);
-            strokeWeight(2);
+            strokeWeight(4);
             circle (canvasPos[0], canvasPos[1], canvasDiameter + 6);
             noStroke();
         }
@@ -1302,6 +1305,8 @@ function drawCurrentSimBodies() {
 }
 
 function drawToolbar() {
+    stroke([50,50,200]);
+    strokeWeight(2);
     rectMode(CORNER);
     fill(buttonColourDefault[0], buttonColourDefault[1], buttonColourDefault[2], 100);
     rect(0, height - mainButtonHeight, width, mainButtonHeight);
@@ -1330,11 +1335,11 @@ function getAverageFrameRate() {
 }
 
 function drawScaleBar(c) {
-    
-}
-
-function calculateMaxNewBodyNumber() { // TODO PREVENT NEW BODIES IN LOADED SIMULATIONS BEING GIVEN SAME NAME 
-
+    let scaleBarCanvasWidth = 250;
+    stroke('white');
+    line(width/3, height - mainButtonHeight / 3, width/3+scaleBarCanvasWidth, height-mainButtonHeight/3);
+    let scaleBarSimWidth = c.getSimDistance(scaleBarCanvasWidth);
+    scaleBarTextbox.updateContents(scaleBarSimWidth.toPrecision(3) + "m");
 }
 
 function drawCurrentSimToolbar() {
