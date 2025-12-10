@@ -6,8 +6,6 @@ const states = ['main menu', 'main simulation', 'learn menu', 'pause menu', 'sim
 // storing image data
 let starFieldBackgroundImage;
 let pauseIconImage,playIconImage,cameraIconImage;
-let earthImage;
-let moonImage;
 
 // music data
 let music;
@@ -77,6 +75,7 @@ function preload() {
     bodyImages["saturn"] = loadImage("./assets/saturn.png");
     bodyImages["uranus"] = loadImage("./assets/uranus.png");
     bodyImages["neptune"] = loadImage("./assets/neptune.png");
+    bodyImages["ship"] = loadImage("./assets/ship.png");
     
     cameraIconImage = loadImage("./assets/cameraIcon.png");
     pauseIconImage = loadImage("./assets/pauseIcon.png");
@@ -106,8 +105,32 @@ function setup() {
     // draw rectangle objects with their co-ordinates at their center
     rectMode(CENTER);
     frameRate(60);
+
+    setupUI();
+
     
-    
+
+    // start looping background music after 10 seconds
+    setTimeout(() => { 
+        music.volume = 1;
+        music.loop = true;
+        music.play();
+    }, 10000)
+
+    // prevent opening the context menu on right click
+    document.addEventListener('contextmenu', function (event) {
+        event.preventDefault()
+        return false
+    })
+}
+
+function setupUI() {
+    buttons = [];
+    textBoxes = [];
+    savedSimulationDescriptionBoxes = [];
+    publicSimulationDescriptionBoxes = [];
+    icons = [];
+
     let learnMenuTextBoxWidth;
     let learnMenuTextBoxHeight;
     function initialiseMenuButtons() {
@@ -403,6 +426,17 @@ function setup() {
         textBoxes[states.indexOf('si units menu')] = SIUnitsTextBoxes;
     }
 
+    function initialiseIcons() {
+        let toolbarIconHeight = height - (mainButtonHeight / 2);
+
+        pauseIcon = new Icon(iconWidth, toolbarIconHeight, iconWidth, iconHeight, pauseIconImage);
+        playIcon = new Icon(iconWidth * 2, toolbarIconHeight, iconWidth, iconHeight, playIconImage);
+        cameraIcon = new Icon(1 * width / 2 + iconWidth, toolbarIconHeight, iconWidth, iconHeight, cameraIconImage);
+
+
+        icons[states.indexOf('main simulation')] = [pauseIcon, playIcon, cameraIcon];
+    }
+
     function initialiseMainSimulation() {
         currentSimulation = new Simulation();
 
@@ -423,7 +457,10 @@ function setup() {
         //currentSimulation.addBody(new Body('ganymede', [-149.6e9 + 7.7841e11 + 1e9, 0], [0, 13.1e3 + 10.9e3], 1.48e23, (2634.1e3) *2, "moon", [255,255,255]));
         //currentSimulation.addBody(new Body('phobos', [-149.6e9 + 2.2794e11 + 9376e3,0], [0,24e3 + 2.138e3], 1.06e16, 22.2e3, "moon", [255,255,255]));
 
-        //currentSimulation.addBody(new Body('centre', [-149.6e9 - 2.5544e+20, 0], [0,0], 1.5e12 * 1.988e30, 1, "none", [255,255,255]));
+        //currentSimulation.addBody(new Body('ship', [0 + 1.58e7, 0], [0, 29.78e3 + 5e3], 2e5, 50, "ship", [255,255,255]));
+        //currentSimulation.getBodyByName('ship').setMinCanvasDiameter(8);
+
+        //currentSimulation.addBody(new Body('galactic centre', [-149.6e9 - 2.5544e+20, 0], [0,0], 1.5e12 * 1.988e30, 1, "none", [255,255,255]));
 
         currentSimulation.getBodyByName('moon').setMinCanvasDiameter(0);
         //currentSimulation.getBodyByName('ganymede').setMinCanvasDiameter(0);
@@ -431,7 +468,8 @@ function setup() {
         //currentSimulation.getBodyByName('centre').setMinCanvasDiameter(10);
 
         currentSimulation.getBodyByName('sun').setMinCanvasDiameter(5);
-//
+        
+    //
         //currentSimulation.getCamera().setZoom(1 * (1/1.1) ** 11);
         //currentSimulation.getCamera().setPosition([0, 0]);
 
@@ -440,24 +478,6 @@ function setup() {
         quickSavedSimulation = new Simulation();
         quickSavedSimulation.setData(JSON.stringify(currentSimulation.getSimulationData()));
     }
-
-    function initialiseIcons() {
-        let toolbarIconHeight = height - (mainButtonHeight / 2);
-
-        pauseIcon = new Icon(iconWidth, toolbarIconHeight, iconWidth, iconHeight, pauseIconImage);
-        playIcon = new Icon(iconWidth * 2, toolbarIconHeight, iconWidth, iconHeight, playIconImage);
-        cameraIcon = new Icon(1 * width / 2 + iconWidth, toolbarIconHeight, iconWidth, iconHeight, cameraIconImage);
-
-
-        icons[states.indexOf('main simulation')] = [pauseIcon, playIcon, cameraIcon];
-    }
-
-    // sets up menu button and text box attributes
-    initialiseMenuButtons();
-    initialiseMenuTextBoxes();
-    initialiseMainSimulation();
-    initialiseIcons();
-    setAccurateYear();
 
     // instantiate savedSimulationDescriptionBoxes
     savedSimulationDescriptionBoxes.push(new SimulationDescriptionBox(1 * width / 8 + 0 * 5, height / 5, (width/4) - 5, 0.7 * height));
@@ -468,18 +488,12 @@ function setup() {
     publicSimulationDescriptionBoxes.push(new SimulationDescriptionBox(3 * width / 8 + 1 * 5, height / 5, (width/4) - 5, 0.7 * height));
     publicSimulationDescriptionBoxes.push(new SimulationDescriptionBox(5 * width / 8 + 2 * 5, height / 5, (width/4) - 5, 0.7 * height));
 
-    // start looping background music after 10 seconds
-    setTimeout(() => { 
-        music.volume = 1;
-        music.loop = true;
-        music.play();
-    }, 10000)
-
-    // prevent opening the context menu on right click
-    document.addEventListener('contextmenu', function (event) {
-        event.preventDefault()
-        return false
-    })
+    // sets up menu button and text box attributes
+    initialiseMenuButtons();
+    initialiseMenuTextBoxes();
+    initialiseMainSimulation();
+    initialiseIcons();
+    setAccurateYear();
 }
 
 function updateUnitSettingsBoxes() {
@@ -1290,6 +1304,9 @@ function drawCurrentSimBodies() {
             }
         }
 
+        // TODO DRAW SHIP AT CORRECT ANGLE
+
+
         if (currentlyDragging instanceof Body && currentlyDragging === body) {
             noFill();
             stroke (255, 255, 150);
@@ -1302,6 +1319,16 @@ function drawCurrentSimBodies() {
     // return display modes to default for rest of program 
     imageMode(CORNER); // ask rhys about commenting on this fixed bug 
     ellipseMode(CORNER);
+}
+
+function drawImageRotated(img, x, y, w, h, angle) { // TODO
+  imageMode(CENTER);
+  translate(x + w / 2, y + w / 2);
+  rotate(PI/180*angle);
+  image(img, 0, 0, w, h);
+  rotate(-PI / 180 * angle);
+  translate(-(x + w / 2), -(y + w / 2));
+  imageMode(CORNER);
 }
 
 function drawToolbar() {
@@ -1334,7 +1361,7 @@ function getAverageFrameRate() {
     return mean;
 }
 
-function drawScaleBar(c) {
+function drawScaleBar(c) { // TODO SCALE WITH WINDOW SIZE
     let scaleBarCanvasWidth = 250;
     stroke('white');
     line(width/3, height - mainButtonHeight / 3, width/3+scaleBarCanvasWidth, height-mainButtonHeight/3);
@@ -1509,4 +1536,9 @@ function setAccurateYear() {
     let seconds = 0;
     seconds += secondsPerYear * year();
     currentSimulation.setTime(seconds);
+}
+
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+    setupUI();
 }

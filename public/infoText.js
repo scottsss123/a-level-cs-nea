@@ -29,7 +29,8 @@ At a planetary scale ( like with this sandbox-simulation ) the main force acting
   and   r is the distance between thw two bodies.`;
 const SIUnitsString = `SI Units
 ----------
-SI is a french abbreviation for Système international d'unités, in english an international standard of units.`;
+SI is a french abbreviation for Système international d'unités, in english an international standard of units.
+...`;
 const simulationTutorialString = `Controls 
 ----------------------------------------------------------------------------------------------------------------------
 Simulation Controls

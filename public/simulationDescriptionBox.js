@@ -18,8 +18,7 @@ class SimulationDescriptionBox extends TextBox {
         let simulationID = simulationMetaData.SimulationID;
         this.#linkedSimulationID = simulationID;
 
-        let out = simulationName + "\n" + simulationDescription + "\n" + simulationID;
-
+        let out = "Simulation ID          : " + simulationID + "\nSimulation Name        : " + simulationName + "\nSimulation Description : " + simulationDescription;
         super.updateContents(out);
     }
 

@@ -86,7 +86,7 @@ class Camera {
         let radius = Math.sqrt((bodyCanvasPosition[0]-mousePosition[0])**2 + ((bodyCanvasPosition[1]-mousePosition[1])**2));
         
         // return true if cursor overlaps body
-        if (radius <= bodyRadius || radius <= body.getMinCanvasDiameter()) {
+        if (radius <= bodyRadius + 6) { // + 6 extra diameter of hover circle 
             return true;
         }
         return false;

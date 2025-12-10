@@ -21,9 +21,11 @@ class Button extends Box {
 
     // display same as box also with centered text
     display() {
+        stroke([50,50,200]);
         super.display();
         textAlign(CENTER, MIDDLE);
         fill([255,255,255]);
+        noStroke();
         text(this.#txt, this.getPos()[0], this.getPos()[1]);
     }
 

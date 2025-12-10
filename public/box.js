@@ -17,6 +17,9 @@ class Box {
 
     // default display for menu boxes, for testing as should be overwritten by box's child classes
     display() {
+        if (this instanceof TextBox && (this instanceof BodyInfoPopupBox) === false && (this instanceof UpdateBodyPopupBox) === false) {
+            stroke([255,255,255]);
+        }
         fill(this.#colour);
         rect(this.#pos[0], this.#pos[1], this.#width, this.#height);
     }
