@@ -210,16 +210,26 @@ class Simulation {
         }
     }
 
+    resetFutureBodyPositions() {
+        for (let i = 0; i < this.#bodies.length; i++) {
+            this.#futureBodyPositions[i] = [];
+        }
+    }
+
     updateFutureBodyPositions() {
+        // set future body position array to empty
         this.resetFutureBodyPositions();
 
+        // clone current simulation 
         let cloneSim = new Simulation();
         cloneSim.setData(JSON.stringify(this.getSimulationData()));
         
+        // if simulation paused, still draw future body paths
         if (this.#timeRate === 0) {
             cloneSim.setTimeRate(this.#prevTimeRate);
         }
 
+        // step cloned simulation 1000 times & store body positions
         for (let i = 0; i < 999; i++) {
             for (let j = 0; j < this.#bodies.length; j++) {
                 let pos = cloneSim.getBodies()[j].getPos();
@@ -228,12 +238,6 @@ class Simulation {
             cloneSim.simpleStep();
         }
 
-    }
-
-    resetFutureBodyPositions() {
-        for (let i = 0; i < this.#bodies.length; i++) {
-            this.#futureBodyPositions[i] = [];
-        }
     }
 
     getPrevBodyPositionsByIndex(index) {
