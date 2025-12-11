@@ -1,9 +1,12 @@
 html, body {
     height: 100%;
+    background-color: rgb(50,50,200);
 }
 
 canvas, html, body {
+  display: flex;   
+  align-items: center;  
+  justify-content: center;
   overflow: hidden; /* Hide vertical scrollbar */
-
 }
 

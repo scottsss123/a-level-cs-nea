@@ -141,6 +141,7 @@ class Simulation {
                 // calculate unit vector in direction of bodyi to bodyj, unitVec
                 let dir = [pos2[0] - pos1[0], pos2[1] - pos1[1]];
                 let modDir = Math.sqrt((dir[0] ** 2) + (dir[1] ** 2));
+                // TODO LOG ROBUSTNESS CHECK OF same pos
                 let unitVec = [dir[0] / modDir, dir[1] / modDir];
                 // calculate magnitude of force, could be extracted to function
                 let forceMag = (this.#G * mass1 * mass2) / (modDir ** 2);
@@ -248,7 +249,7 @@ class Simulation {
         return this.#futureBodyPositions[index];
     }
 
-    handleCollisions() { // TODO FIX PHYSICS HERE
+    handleCollisions() { 
         let bodies = this.#bodies;
         let destroyedIndices = [];
         for (let i = 0; i < bodies.length; i++) {

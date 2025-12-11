@@ -451,7 +451,6 @@ function setupUI() {
         scaleBarTextbox.toggleDisplayBox();
         let mainSimulationTextBoxes = [timeRateTextBox, timeTextBox, camZoomTextBox, camPosTextBox, scaleBarTextbox];
     
-
         let simulationTutorialTextBoxes = [];
         simulationTutorialTextBoxes.push(new TextBox(learnMenuTextBoxX, learnMenuTextBoxY, learnMenuTextBoxWidth, learnMenuTextBoxHeight, simulationTutorialString));
 
@@ -1360,7 +1359,7 @@ function getAverageFrameRate() {
     return mean;
 }
 
-function drawScaleBar(c) { // TODO SCALE WITH WINDOW SIZE
+function drawScaleBar(c) { 
     let scaleBarCanvasWidth = 250;
     stroke('white');
     line(width/3, height - mainButtonHeight / 3, width/3+scaleBarCanvasWidth, height-mainButtonHeight/3);
@@ -1403,7 +1402,6 @@ function drawCurrentSimToolbar() {
     timeTextBox.updateContents(secondsToDisplayTime(simTime)); 
     camZoomTextBox.updateContents("x"+cameraZoom.toPrecision(3));
     camPosTextBox.updateContents("( " + displayCameraPos[0].toPrecision(3) + " (m) , " + displayCameraPos[1].toPrecision(3) + "(m) ) ( " + modPos.toPrecision(3) + " (m), " + argPos.toPrecision(3) + " (°) )");
-    // ^ add mod arg display for ux & update units alongside the settings
 }
 
 function mainSimKeyHeldHandler() {

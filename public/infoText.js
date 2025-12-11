@@ -28,9 +28,58 @@ At a planetary scale ( like with this sandbox-simulation ) the main force acting
         m₁, m₂ are the masses of the two bodies
   and   r is the distance between thw two bodies.`;
 const SIUnitsString = `SI Units
-----------
-SI is a french abbreviation for Système international d'unités, in english an international standard of units.
-...`;
+--------
+ 
+The International System of Units (SI) is the standard for measurement in science and engineering. It consists of seven base units and many derived units.
+ 
+Base Units:
+1 Length - meter (m)
+2 Mass - kilogram (kg)
+3 Time - second (s)
+4 Electric Current - ampere (A)
+5 Temperature - kelvin (K)
+6 Amount of Substance - mole (mol)
+7 Luminous Intensity - candela (cd)
+ 
+Derived Units:
+Force - newton (N) = kg·m·s^-2
+Energy - joule (J) = kg·m^2·s^-2
+Power - watt (W) = kg·m^2·s^-3
+Pressure - pascal (Pa) = kg·m^-1·s^-2
+ 
+Prefixes:
+kilo (k) = 10^3
+mega (M) = 10^6
+giga (G) = 10^9
+milli (m) = 10^-3
+micro (µ) = 10^-6
+nano (n) = 10^-9
+ 
+Program Units and Constants
+---------------------------
+ 
+Earth:
+Mass = 5.972 × 10^24 kg
+Diameter = 12742 km
+ 
+Sun:
+Mass = 1.989 × 10^30 kg
+Diameter = 1.3927 × 10^6 km
+ 
+Speed of Light:
+c = 299792458 m/s
+ 
+Velocity Units:
+Miles per hour (mph) = 1609.34 meters per hour
+1 mph ≈ 0.44704 m/s
+ 
+Gravitational Constant:
+G = 6.67430 × 10^-11 m^3·kg^-1·s^-2
+`
+//const SIUnitsString = `SI Units
+//----------
+//SI is a french abbreviation for Système international d'unités, in english an international standard of units.
+//...`;
 const simulationTutorialString = `Controls 
 ----------------------------------------------------------------------------------------------------------------------
 Simulation Controls
