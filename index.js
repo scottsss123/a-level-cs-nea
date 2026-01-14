@@ -23,32 +23,30 @@ io.on('connection', connected);
 // log serverside user socket id
 function connected(socket) {
     socket.join(""+socket.id);    
-
     console.log(socket.id + " has connected");
 
     // enable client to call insertNewUser() on server
-    socket.on('signupUser', (data) => { signupUser(data) });
-    socket.on('loginUser', (data) => { loginUser(data) });
     // log usernames and/or password hashes to serverside terminal
     //socket.on('logUsernames', () => { logUsernames() });
     //socket.on('logPasswordHashes', () => { logPasswordHashes() });
     //socket.on('logUsers', () => {logUsers()});
-
     //socket.on('logdata', (data) => {
     //    console.log(data);
     //})
+    //socket.on('loglastuserid', () => { loglastuserid(); })
 
+    socket.on('signupUser', (data) => { signupUser(data) });
+    socket.on('loginUser', (data) => { loginUser(data) });  
     socket.on('insertSimulation', (data) => { insertSimulation(data); });
     socket.on('saveSettings', (data) => { saveSettings(data); });
     socket.on('loadSettings', (data) => { loadSettings(data); });
     socket.on('saveSimulation', (data) => { saveSimulation(data); });
     socket.on('saveAsSimulation', (data) => { saveAsSimulation(data); });
-    //socket.on('loglastuserid', () => { loglastuserid(); })
-    socket.on('setCurrentSimulationByID', (data) => {setCurrentSimulationByID(data); }); //
-    socket.on('updateSavedSimulationDescriptionBoxes', (data) => {updateSavedSimulationDescriptionBoxes(data); }); //
-    socket.on('loadSimulationByID', (data) => { loadSimulationByID(data); }); //
-    socket.on('updatePublicSimulationDescriptionBoxes', () => { updatePublicSimulationDescriptionBoxes(); }); //
-    socket.on('deleteSimulationByID', (data) => { deleteSimulationByID(data); }); //
+    socket.on('setCurrentSimulationByID', (data) => {setCurrentSimulationByID(data); }); 
+    socket.on('updateSavedSimulationDescriptionBoxes', (data) => {updateSavedSimulationDescriptionBoxes(data); }); 
+    socket.on('loadSimulationByID', (data) => { loadSimulationByID(data); }); 
+    socket.on('updatePublicSimulationDescriptionBoxes', () => { updatePublicSimulationDescriptionBoxes(); }); 
+    socket.on('deleteSimulationByID', (data) => { deleteSimulationByID(data); }); 
 
 }
 
@@ -264,7 +262,7 @@ async function saveSettings(data) { // data = { userID: int, volume: 0/1, length
     });
 }
 
-async function loadSettings(data) { // data = {userID: int}
+async function loadSettings(data) { 
     let settings = await getSettings();
     for (let i = 0; i < settings.length; i++) {
         if (settings[i].UserID === data.userID) {
