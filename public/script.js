@@ -11,6 +11,8 @@ let pauseIconImage,playIconImage,cameraIconImage;
 let music;
 let switchSound;
 
+let socketId;
+
 let mainButtonWidth;
 let mainButtonHeight;
 // 2d list of lists of buttons: buttons[i] is the list of buttons to be shown in state = i
@@ -88,12 +90,11 @@ function preload() {
 
 // first function containing logic, is run immediately after preload by q5 library
 function setup() {
-    
     socket.on('loginError', (err) => { loginError(err) });
     socket.on('alert', (txt) => {alert(txt)});
     socket.on('log', (data) => {console.log(data)});
     socket.on('setUser', (data) => { setUser(data) });
-    socket.on('loadSettings', (settings) => { loadSettings(settings) });
+    socket.on('loadSettings', (data) => { loadSettings(data) });
     socket.on('setCurrentSimulationID', (id) => { currentSimulation.setID(id); });
     socket.on('setCurrentSimulation', (data) => { setCurrentSimulation(data); });
     socket.on('updateSavedSimulationDescriptionBoxes', (userSimulationMetaDatas) => { updateSavedSimulationDescriptionBoxes(userSimulationMetaDatas); });
@@ -219,7 +220,7 @@ function setupUI() {
             }
             let inPassword = prompt("Log In:\nEnter password: ");
             let inPasswordHash = inPassword; // no password hash yet
-            let data = { username: inUsername, passwordHash: inPasswordHash };
+            let data = { username: inUsername, passwordHash: inPasswordHash, id: socket.id };
             socket.emit('loginUser', data);
         }
 
@@ -232,7 +233,7 @@ function setupUI() {
             }
             let inPassword = prompt("Sign Up:\nEnter password (use unique password): ");
             let inPasswordHash = inPassword; // no password hash yet
-            let data = { username: inUsername, passwordHash: inPasswordHash };
+            let data = { username: inUsername, passwordHash: inPasswordHash, id:socket.id };
             socket.emit('signupUser', data);
         }
 
@@ -274,7 +275,7 @@ function setupUI() {
         let publicSimulationsButton = new Button(mainMenuButtonX, (windowHeight / 2) + (1 * mainMenuButtonOffset), mainButtonWidth, mainButtonHeight, 'public simulations', states.indexOf('public simulations menu'));
         mySimulationsButton.onPress = () => { 
             loadSimulationIndex = 0;
-            socket.emit('updateSavedSimulationDescriptionBoxes', currentUserID);
+            socket.emit('updateSavedSimulationDescriptionBoxes', {userID: currentUserID, id: socket.id});
         };
         publicSimulationsButton.onPress = () => { 
             loadSimulationIndex = 0;
@@ -329,13 +330,13 @@ function setupUI() {
 
         let saveSettingsButton = new Button(topRightMenuButtonX, topMenuButtonY + 4 * mainMenuButtonOffset, mainButtonWidth, mainButtonHeight, 'save user settings',-1);
         saveSettingsButton.onPress = () => {
-            socket.emit('saveSettings', { userID: currentUserID, volume:music.volume, lengthUnit:displayDistanceUnit, massUnit:displayMassUnit, speedUnit: displaySpeedUnit });
+            socket.emit('saveSettings', { userID: currentUserID, volume:music.volume, lengthUnit:displayDistanceUnit, massUnit:displayMassUnit, speedUnit: displaySpeedUnit , id:socket.id});
         }
         settingsMenuButtons.push(saveSettingsButton);
 
         let loadSettingsButton = new Button(topRightMenuButtonX, topMenuButtonY + 6 * mainMenuButtonOffset, mainButtonWidth, mainButtonHeight, 'load user settings',-1);
         loadSettingsButton.onPress = () => {
-            socket.emit('loadSettings', { userID: currentUserID });
+            socket.emit('loadSettings', { userID: currentUserID, id: socket.id});
         }
         settingsMenuButtons.push(loadSettingsButton);
         
@@ -534,6 +535,7 @@ function saveSimulation() {
         isPublic: isPublic,
         name: name,
         description: description,
+        id: socket.id
     };
 
     socket.emit('saveSimulation', data);
@@ -567,6 +569,7 @@ function saveAsSimulation() {
         isPublic: isPublic,
         name: name,
         description: description,
+        id: socket.id
     };
 
     socket.emit('saveAsSimulation', data);
@@ -981,7 +984,7 @@ function savedSimulationDescriptionBoxPressed() {
             if (mouseButton === 'right') {
                 let deleteConfirmationInput = prompt("Delete simulation, are you sure ? (y / n)");
                 if (deleteConfirmationInput === 'y') {
-                    socket.emit('deleteSimulationByID', {simulationID: box.getSimulationID(), userID: currentUserID});
+                    socket.emit('deleteSimulationByID', {simulationID: box.getSimulationID(), userID: currentUserID, id:socket.id});
                 }
                 return;
             }
@@ -992,7 +995,7 @@ function savedSimulationDescriptionBoxPressed() {
             }
             
             let simulationID = box.getSimulationID();
-            socket.emit('loadSimulationByID', simulationID);
+            socket.emit('loadSimulationByID', {simID: simulationID, id:socket.id});
         }
     }
 }
@@ -1005,7 +1008,7 @@ function publicSimulationDescriptionBoxPressed() {
                 return;
             }
             let simulationID = box.getSimulationID();
-            socket.emit('loadSimulationByID', simulationID);
+            socket.emit('loadSimulationByID', {simID: simulationID, id:socket.id});
         }
     }
 }
@@ -1254,7 +1257,7 @@ function keyPressed() {
                     break;
                 }
 
-            socket.emit('updateSavedSimulationDescriptionBoxes', currentUserID);
+            socket.emit('updateSavedSimulationDescriptionBoxes', {userID: currentUserID, id:socket.id});
             socket.emit('updatePublicSimulationDescriptionBoxes');
             break;
     }

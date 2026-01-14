@@ -105,6 +105,8 @@ class UpdateBodyPopupBox extends Box {
         console.log(numInput);
         if (numInput === 0) {
             return false;
+        } else if (numInput < 0) {
+            return true;
         }
         let newMass = numInput * (1/massUnits[this.#displayMassUnit]);
         // update linked body's mass

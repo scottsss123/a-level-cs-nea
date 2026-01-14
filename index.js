@@ -22,31 +22,34 @@ io.on('connection', connected);
 
 // log serverside user socket id
 function connected(socket) {
+    socket.join(""+socket.id);    
+
     console.log(socket.id + " has connected");
 
     // enable client to call insertNewUser() on server
     socket.on('signupUser', (data) => { signupUser(data) });
     socket.on('loginUser', (data) => { loginUser(data) });
     // log usernames and/or password hashes to serverside terminal
-    socket.on('logUsernames', () => { logUsernames() });
-    socket.on('logPasswordHashes', () => { logPasswordHashes() });
-    socket.on('logUsers', () => {logUsers()});
+    //socket.on('logUsernames', () => { logUsernames() });
+    //socket.on('logPasswordHashes', () => { logPasswordHashes() });
+    //socket.on('logUsers', () => {logUsers()});
 
-    socket.on('logdata', (data) => {
-        console.log(data);
-    })
+    //socket.on('logdata', (data) => {
+    //    console.log(data);
+    //})
 
     socket.on('insertSimulation', (data) => { insertSimulation(data); });
     socket.on('saveSettings', (data) => { saveSettings(data); });
     socket.on('loadSettings', (data) => { loadSettings(data); });
     socket.on('saveSimulation', (data) => { saveSimulation(data); });
     socket.on('saveAsSimulation', (data) => { saveAsSimulation(data); });
-    socket.on('loglastuserid', () => { loglastuserid(); })
-    socket.on('setCurrentSimulationByID', (ID) => {setCurrentSimulationByID(ID); });
-    socket.on('updateSavedSimulationDescriptionBoxes', (ID) => {updateSavedSimulationDescriptionBoxes(ID); });
-    socket.on('loadSimulationByID', (ID) => { loadSimulationByID(ID); });
-    socket.on('updatePublicSimulationDescriptionBoxes', () => { updatePublicSimulationDescriptionBoxes(); });
-    socket.on('deleteSimulationByID', (data) => { deleteSimulationByID(data); });
+    //socket.on('loglastuserid', () => { loglastuserid(); })
+    socket.on('setCurrentSimulationByID', (data) => {setCurrentSimulationByID(data); }); //
+    socket.on('updateSavedSimulationDescriptionBoxes', (data) => {updateSavedSimulationDescriptionBoxes(data); }); //
+    socket.on('loadSimulationByID', (data) => { loadSimulationByID(data); }); //
+    socket.on('updatePublicSimulationDescriptionBoxes', () => { updatePublicSimulationDescriptionBoxes(); }); //
+    socket.on('deleteSimulationByID', (data) => { deleteSimulationByID(data); }); //
+
 }
 
 // log db usernames to serverside console
@@ -116,9 +119,9 @@ function insertSimulation(data) { // UserID, SimulationJSON, IsPublic
     db.all(sql, (err) => {
         if (err) {
             console.log(err);
-            io.emit('alert', 'error saving simulation');
+            io.to(data.id).emit('alert', 'error saving simulation');
         } else {
-            io.emit('alert', 'simulation saved successfully');
+            io.to(data.id).emit('alert', 'simulation saved successfully');
         }
     })
 }
@@ -139,7 +142,7 @@ async function signupUser(data) {
     }
 
     if (usernameExists) {
-        io.emit('alert', 'Username already exists, try a logging in or a different username');
+        io.to(data.id).emit('alert', 'Username already exists, try a logging in or a different username');
         return;
     }
 
@@ -150,11 +153,11 @@ async function signupUser(data) {
     db.all(sql, async (err) => {
         if (err) {
             console.log(err);
-            io.emit('alert', 'Signup error: ' + err);
+            io.to(data.id).emit('alert', 'Signup error: ' + err);
         } else {
-            io.emit('alert', "User '" + username + "' created");
+            io.to(data.id).emit('alert', "User '" + username + "' created");
             let lastUserID = await getLastUserID();
-            io.emit('setUser', {username: username, userID: lastUserID});
+            io.to(data.id).emit('setUser', {username: username, userID: lastUserID});
         }
     })
 }
@@ -178,17 +181,17 @@ async function loginUser(data) {
     }
 
     if (!usernameExists) {
-        io.emit("alert", "Username does not exist, try signing up to create new user");
+        io.to(data.id).emit("alert", "Username does not exist, try signing up to create new user");
         return;
     } 
 
     if (passwordHash !== userPasswordHash) {
-        io.emit("alert", "Password does not match user's password, try again");
+        io.to(data.id).emit("alert", "Password does not match user's password, try again");
         return;
     }
 
-    io.emit("alert", "Log in successful\nCurrent user: " + username);
-    io.emit("setUser", { userID : userID, username: username });
+    io.to(data.id).emit("alert", "Log in successful\nCurrent user: " + username);
+    io.to(data.id).emit("setUser", { userID : userID, username: username });
 }
 
 function getSettings() {
@@ -218,7 +221,7 @@ async function saveSettings(data) { // data = { userID: int, volume: 0/1, length
     }
 
     if (userID <= 0) {
-        io.emit('alert', "must be logged in to save settings, visit profile menu");
+        io.to(data.id).emit('alert', "must be logged in to save settings, visit profile menu");
         return;
     }
 
@@ -239,9 +242,9 @@ async function saveSettings(data) { // data = { userID: int, volume: 0/1, length
         db.all(sql, (err) => {
             if (err) {
                 console.log(err);
-                io.emit('alert', 'settings save error: ' + err);
+                io.to(data.id).emit('alert', 'settings save error: ' + err);
             } else {
-                io.emit('alert', " settings saved for the first time");
+                io.to(data.id).emit('alert', " settings saved for the first time");
             }
         });
         
@@ -254,9 +257,9 @@ async function saveSettings(data) { // data = { userID: int, volume: 0/1, length
     db.all(sql, (err) => {
         if (err) {
             console.log(err);
-            io.emit('alert', 'settings save error: ' + err);
+            io.to(data.id).emit('alert', 'settings save error: ' + err);
         } else {
-            io.emit('alert', " settings saved");
+            io.to(data.id).emit('alert', " settings saved");
         }
     });
 }
@@ -265,8 +268,8 @@ async function loadSettings(data) { // data = {userID: int}
     let settings = await getSettings();
     for (let i = 0; i < settings.length; i++) {
         if (settings[i].UserID === data.userID) {
-            io.emit('loadSettings', { volume: settings[i].Volume, lengthUnit: settings[i].LengthUnit, massUnit: settings[i].MassUnit, speedUnit: settings[i].SpeedUnit });
-            io.emit('alert', "settings loaded successfully");
+            io.to(data.id).emit('loadSettings', { volume: settings[i].Volume, lengthUnit: settings[i].LengthUnit, massUnit: settings[i].MassUnit, speedUnit: settings[i].SpeedUnit });
+            io.to(data.id).emit('alert', "settings loaded successfully");
             return;
         }
     }
@@ -332,7 +335,7 @@ async function saveSimulation(data) {
         if (err) {
             console.log(err);
         } else {
-            io.emit('alert', 'simulation saved successfully');
+            io.to(data.id).emit('alert', 'simulation saved successfully');
         }
     })
 }
@@ -382,15 +385,15 @@ async function saveAsSimulation(data) { // data = { userID: int , simulationStri
     db.all(sql, (err) => {
         if (err) {
             console.log(err);
-            io.emit('alert', 'simulation save as error: ' + err);
+            io.to(data.id).emit('alert', 'simulation save as error: ' + err);
         } else {
-            io.emit('alert', "simulation successfullty saved\nname: " + name);
+            io.to(data.id).emit('alert', "simulation successfullty saved\nname: " + name);
         }
     });
 
     let lastSimulationID = await getLastSimulationId();
-    io.emit('setCurrentSimulationID', lastSimulationID);
-    io.emit('log', lastSimulationID);
+    io.to(data.id).emit('setCurrentSimulationID', lastSimulationID);
+    io.to(data.id).emit('log', lastSimulationID);
 }
 
 function getSimulationByID(ID) {
@@ -408,19 +411,19 @@ function getSimulationByID(ID) {
     })
 }
 
-async function setCurrentSimulationByID(ID) {
-    let simulationData = await getSimulationByID(ID);
+async function setCurrentSimulationByID(data) {
+    let simulationData = await getSimulationByID(data.simID);
     let outData = simulationData.Simulation;
-    io.emit('setCurrentSimulation', outData);
+    io.to(data.id).emit('setCurrentSimulation', outData);
 }
 
 //  send user's simulations' meta datas to the client
-async function updateSavedSimulationDescriptionBoxes(ID) {
+async function updateSavedSimulationDescriptionBoxes(data) {
     let simulationMetaDatas = await getSimulationMetaDatas();
     let userSimulationMetaDatas = [];
 
     for (let simulationMetaData of simulationMetaDatas) {
-        if (simulationMetaData.UserID === ID) {
+        if (simulationMetaData.UserID === data.userID) {
             userSimulationMetaDatas.push(simulationMetaData);
         }
     }
@@ -428,7 +431,7 @@ async function updateSavedSimulationDescriptionBoxes(ID) {
     console.log('meta datas: ' , userSimulationMetaDatas);
 
 
-    io.emit('updateSavedSimulationDescriptionBoxes', userSimulationMetaDatas);
+    io.to(data.id).emit('updateSavedSimulationDescriptionBoxes', userSimulationMetaDatas);
 }
 
 //  send public simulations' meta datas to the client
@@ -447,11 +450,11 @@ async function updatePublicSimulationDescriptionBoxes() {
     io.emit('updatePublicSimulationDescriptionBoxes', publicSimulationMetaDatas);
 }
 
-async function loadSimulationByID(ID) {
+async function loadSimulationByID(data) {
     
-    let simulationData = await getSimulationByID(ID);
+    let simulationData = await getSimulationByID(data.simID);
     
-    io.emit('setCurrentSimulation', simulationData.Simulation);
+    io.to(data.id).emit('setCurrentSimulation', simulationData.Simulation);
     
 }
 
@@ -464,7 +467,7 @@ async function deleteSimulationByID(data) {
             console.log(err);
         } else {
             console.log('simulation id: ' + data.simulationID + " deleted");
-            io.emit('alert', 'simulation id: ' + data.simulationID + ' deleted');
+            io.to(data.id).emit('alert', 'simulation id: ' + data.simulationID + ' deleted');
             updateSavedSimulationDescriptionBoxes(data.userID);
         }
     })
