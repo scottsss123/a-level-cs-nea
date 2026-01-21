@@ -16,9 +16,10 @@ class SimulationDescriptionBox extends TextBox {
         let simulationName = simulationMetaData.Name;
         let simulationDescription = simulationMetaData.Description;
         let simulationID = simulationMetaData.SimulationID;
+        let username = simulationMetaData.Username;
         this.#linkedSimulationID = simulationID;
 
-        let out = "Simulation ID          : " + simulationID + "\nSimulation Name        : " + simulationName + "\nSimulation Description : " + simulationDescription;
+        let out = "\nSimulation Name        : " + simulationName + "\nUsername               : " + username + "\nSimulation Description : " + simulationDescription;
         super.updateContents(out);
     }
 

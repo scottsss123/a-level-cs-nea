@@ -1,5 +1,6 @@
 // import libraries required to connect users to server and manage database
 const sqlite3 = require('sqlite3');
+const crypto = require('crypto');
 var express = require('express');
 var socket = require('socket.io');
 const { emit } = require('process');
@@ -48,6 +49,12 @@ function connected(socket) {
     socket.on('updatePublicSimulationDescriptionBoxes', () => { updatePublicSimulationDescriptionBoxes(); }); 
     socket.on('deleteSimulationByID', (data) => { deleteSimulationByID(data); }); 
 
+}
+
+function hash(inputString) {
+    const hash = crypto.createHash('sha256');
+    hash.update(inputString);
+    return hash.digest('hex');
 }
 
 // log db usernames to serverside console
@@ -128,7 +135,7 @@ function insertSimulation(data) { // UserID, SimulationJSON, IsPublic
 // data = { username: string, passwordHash: string }
 async function signupUser(data) {
     let username = data.username;
-    let passwordHash = data.passwordHash;
+    let passwordHash = hash(data.passwordHash);
 
     let users = await getUsers();
 
@@ -162,7 +169,7 @@ async function signupUser(data) {
 
 async function loginUser(data) {
     let username = data.username;
-    let passwordHash = data.passwordHash;
+    let passwordHash = hash(data.passwordHash);
 
     let users = await getUsers();
     let userID;
@@ -275,8 +282,10 @@ async function loadSettings(data) {
 }
 
 function getSimulationMetaDatas() {
-    let sql = "SELECT UserID, SimulationID, IsPublic, Name, Description FROM Simulations;";
+    //let sql = "SELECT UserID, SimulationID, IsPublic, Name, Description FROM Simulations;";
     // console.log("sql:", sql);
+    let sql = "SELECT Simulations.UserID, Simulations.SimulationID, Simulations.IsPublic, Simulations.Name, Simulations.Description, Users.Username FROM Simulations, Users;";
+
 
     return new Promise((resolve) => {
         db.all(sql, (err,rows) => {
