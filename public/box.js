@@ -6,7 +6,7 @@ class Box {
     #height;
     #colour; 
    
-    // public procedure method 'new'
+    // public procedure 'new'
     constructor (inX, inY, inWidth, inHeight, inColour) { 
         // initialise private attributes to given parameters
         this.#pos = [inX, inY];

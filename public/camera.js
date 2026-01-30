@@ -8,7 +8,7 @@ class Camera {
     constructor(inPos, inZoom) {
         this.#pos = inPos;
         this.#zoom = inZoom;
-        // takes diameter of earth (meters) to 50 pixels
+        // takes diameter of earth (meters) to 50 pixels for initial value
         this.#scaleFactor = 50 / 12756274;
         this.#focusOffset = [0,0];
     }
@@ -42,12 +42,13 @@ class Camera {
         let canvasY = ((bodyPos[1] - this.#pos[1] - this.#focusOffset[1]) * this.#scaleFactor * this.#zoom) + (height / 2);
         return [canvasX, canvasY]; 
     }
-    getSimPointCanvasPosition(x, y) {
+    getSimPointCanvasPosition(x, y) { 
+        // same as getCanvasPosition for any point, not necessarily of a body
         let canvasX = ((x - this.#pos[0] - this.#focusOffset[0]) * this.#scaleFactor * this.#zoom) + (width / 2);
         let canvasY = ((y - this.#pos[1] - this.#focusOffset[1]) * this.#scaleFactor * this.#zoom) + (height / 2);
         return [canvasX, canvasY]; 
     }
-    getCursorSimPosition(x,y) { // mouseX, mouseY
+    getCursorSimPosition(x,y) { // mouseX, mouseY, returns position in simulation which cursor currently points to
         let mousePos = [x - width / 2, y - height /2];
         let simPos = [mousePos[0] / (this.#scaleFactor * this.#zoom), mousePos[1] / (this.#scaleFactor * this.#zoom)];
         simPos[0] += this.#pos[0] + this.#focusOffset[0];
@@ -86,7 +87,7 @@ class Camera {
         let radius = Math.sqrt((bodyCanvasPosition[0]-mousePosition[0])**2 + ((bodyCanvasPosition[1]-mousePosition[1])**2));
         
         // return true if cursor overlaps body
-        if (radius <= bodyRadius + 6) { // + 6 extra diameter of hover circle 
+        if (radius <= bodyRadius + 6) { // + 6 extra diameter for displayed hover circle 
             return true;
         }
         return false;

@@ -16,6 +16,7 @@ class UpdateBodyPopupBox extends Box {
     }
 
     updateLinePositions() {
+        // draw lines defining change attribute button regions
         let pos = this.getPos();
         this.leftX = pos[0] - this.getWidth() / 2;
         this.rightX = pos[0] + this.getWidth() / 2;
@@ -42,6 +43,7 @@ class UpdateBodyPopupBox extends Box {
 
         line(pos[0] , pos[1], bodyCanvasPos[0], bodyCanvasPos[1]);
 
+        // colour and set outline thickness based on mouse position
         strokeWeight(2);
         if (this.mouseOverlapping()) { 
             strokeWeight(4);
@@ -73,6 +75,7 @@ class UpdateBodyPopupBox extends Box {
         text("Click to update body's velocity", this.leftX + this.getWidth() / 2, (this.bottomY + this.underDiameterLineY) / 2 - 6, this.getWidth(), 12);
     }
 
+    // when clicked, call function corresponding to region cursor within
     clicked(x, y) {
         if (x < this.leftX || x > this.rightX || y < this.topY || y > this.bottomY) {
             console.log('mouse out of update body popup bounds on click')
@@ -131,7 +134,6 @@ class UpdateBodyPopupBox extends Box {
 
     changeVelocity() {
         let relativeCentre = this.#linkedCamera.getRelativeCentre();
-        //console.log("change vel rel centre vel:", relativeCentre.getVel());
 
         // prompt the user for a new body speed, with current unit
         let userInput = prompt('Enter new body speed ( leave blank to keep same speed ) ( ' + this.#displaySpeedUnit + ' ) (= ' + (1/speedUnits[this.#displaySpeedUnit]).toPrecision(3) + 'm/s )');

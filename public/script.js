@@ -143,10 +143,6 @@ function initialiseSimulationObjects() {
     currentSimulation.getBodyByName('moon').setMinCanvasDiameter(0);
     currentSimulation.getBodyByName('sun').setMinCanvasDiameter(5);
 
-
-    //currentSimulation.getCamera().setZoom(1 * (1/1.1) ** 11);
-    //currentSimulation.getCamera().setPosition([0, 0]);
-    //acurrentSimulation.setFocusByName('earth');
     quickSavedSimulation = new Simulation();
     quickSavedSimulation.setData(JSON.stringify(currentSimulation.getSimulationData()));
 }
@@ -173,6 +169,7 @@ function setupUI() {
     let learnMenuTextBoxWidth;
     let learnMenuTextBoxHeight;
     function initialiseMenuButtons() {
+        // calculate dimensions for menu button positioning
         mainButtonWidth = windowWidth / 3;
         mainButtonHeight = windowHeight / 15;
         let mainMenuButtonX = windowWidth / 2;
@@ -208,6 +205,7 @@ function setupUI() {
         let profileButtons = [];
         let logInButton = new Button(mainMenuButtonX, (windowHeight / 2) - mainMenuButtonOffset, mainButtonWidth, mainButtonHeight, 'Log In', -1);
 
+        // define login menu buttons' functionality
         logInButton.onPress = () => {
             let inUsername = prompt("Log In:\nLeave blank to cancel\nEnter username: ");
             if (!inUsername) {
@@ -320,9 +318,9 @@ function setupUI() {
         let mainSimulationButton = new Button(topRightMenuButtonX, topMenuButtonY, mainButtonWidth, mainButtonHeight, 'simulation', states.indexOf('main simulation'));
         mainSimulationButton.onPress = updatePopupBoxUnits;
         settingsMenuButtons.push(mainSimulationButton);
-
         settingsMenuButtons.push(new Button(topRightMenuButtonX, topMenuButtonY + 2 * mainMenuButtonOffset, mainButtonWidth, mainButtonHeight, 'main menu', states.indexOf('main menu')));
 
+        // define settings menu buttons' functionality
         let saveSettingsButton = new Button(topRightMenuButtonX, topMenuButtonY + 4 * mainMenuButtonOffset, mainButtonWidth, mainButtonHeight, 'save user settings',-1);
         saveSettingsButton.onPress = () => {
             socket.emit('saveSettings', { userID: currentUserID, volume:music.volume, lengthUnit:displayDistanceUnit, massUnit:displayMassUnit, speedUnit: displaySpeedUnit , id:socket.id});
@@ -420,6 +418,7 @@ function setupUI() {
     }
     
     function initialiseMenuTextBoxes() {
+        // calculate dimensions for menu text box positioning
         let learnMenuTextBoxX = 15;
         let learnMenuTextBoxY = 25;
         learnMenuTextBoxHeight = windowHeight - 2 * learnMenuTextBoxY;
@@ -456,6 +455,7 @@ function setupUI() {
         let SIUnitsTextBoxes = [];
         SIUnitsTextBoxes.push(new TextBox(learnMenuTextBoxX, learnMenuTextBoxY, learnMenuTextBoxWidth, learnMenuTextBoxHeight, SIUnitsString));
 
+        // populate textBoxes array
         textBoxes[states.indexOf('main menu')] = mainMenuTextBoxes;
         textBoxes[states.indexOf('main simulation')] = mainSimulationTextBoxes;
         textBoxes[states.indexOf('pause menu')] = mainSimulationTextBoxes;
@@ -491,9 +491,13 @@ function setupUI() {
 }
 
 function updateUnitSettingsBoxes() {
-    buttons[states.indexOf('settings menu')][5].setText('change mass unit : ' + displayMassUnit); // not the best - magic numbers
-    buttons[states.indexOf('settings menu')][6].setText('change distance unit : ' + displayDistanceUnit);
-    buttons[states.indexOf('settings menu')][7].setText('change speed unit : ' + displaySpeedUnit);
+    let changeMassUnitButtonIndex = 5;
+    let changeDistanceUnitButtonIndex = 6;
+    let changeSpeedUnitButtonIndex = 7;
+
+    buttons[states.indexOf('settings menu')][changeMassUnitButtonIndex].setText('change mass unit : ' + displayMassUnit); 
+    buttons[states.indexOf('settings menu')][changeDistanceUnitButtonIndex].setText('change distance unit : ' + displayDistanceUnit);
+    buttons[states.indexOf('settings menu')][changeSpeedUnitButtonIndex].setText('change speed unit : ' + displaySpeedUnit);
 }
 
 function setUser(data) { //data = { userID : int, username : str}
@@ -513,9 +517,9 @@ function saveSimulation() {
         return;
     }
 
-    let name = prompt("Save simulation\nEnter simulation name (leave blank to leave name unchanged):");
+    let name        = prompt("Save simulation\nEnter simulation name (leave blank to leave name unchanged):");
     let description = prompt("Save simulation\nEnter simulation description (leave blank to leave description unchanged):");
-    let isPublic = prompt("Save simulation\nAllow other users to see and load this simulation? (y/n) (leave blank to leave unchanged):");
+    let isPublic    = prompt("Save simulation\nAllow other users to see and load this simulation? (y/n) (leave blank to leave unchanged):");
     
     let currentSimulationID = currentSimulation.getID();
     if (!currentSimulationID) {
@@ -537,14 +541,13 @@ function saveSimulation() {
 }
 
 function saveAsSimulation() {
-
     if(currentUserID <= 0) {
         alert('must be logged in to save simulations, try profile menu');
         return;
     }
 
-    let name = prompt("Save as new simulation\nEnter simulation name:");
-    let description = prompt("Save as new simulation\nEnter simulation description:");
+    let name          = prompt("Save as new simulation\nEnter simulation name:");
+    let description   = prompt("Save as new simulation\nEnter simulation description:");
     let isPublicInput = prompt("Save as new simulation\nAllow other users to see and load this simulation? (y/n)");
     let isPublic = 0;
 
@@ -576,17 +579,13 @@ function setCurrentSimulation(simulationDataString) {
 
 // called once per frame
 function update() {
-
     // execute different logic based on program state
     switch (state) {
-        case 0:  // main menu
-            break;
         case 1:  // main simulation
             // handle held keys, for camera movement
             mainSimKeyHeldHandler();
-
-
             
+            // moved dragged body or text box to mouse position 
             if (currentlyDragging instanceof Body) {
                 currentlyDragging.setPos(currentSimulation.getCamera().getCursorSimPosition(mouseX - dragOffset[0],mouseY - dragOffset[1]));
             } else if (currentlyDragging instanceof BodyInfoPopupBox || currentlyDragging instanceof UpdateBodyPopupBox) {
@@ -597,21 +596,10 @@ function update() {
 
             currentSimulation.moveCameraToFocus();
 
-
             updateInfoPopupBoxes();
-            break;
-        case 2:  // learn menu
             break;
         case 3:  // pause menu
             timeRateTextBox.updateContents('x0.000')
-            break;
-        case 4:  // simulation tutorial menu
-            break;
-        case 5:  // physics info menu
-            break;
-        case 6:  // newtonian mechanics menu
-            break;
-        case 7:  // SI units menu
             break;
         default:
             break;
@@ -623,8 +611,7 @@ function draw() {
     // program logic
     update();
 
-
-    // starry background
+    // draw starry background if toggled on (default on) else black backround
     background(0);
     if (drawBackgroundImage) {
         image(starFieldBackgroundImage, 0, 0, width, height);
@@ -632,9 +619,7 @@ function draw() {
 
     // display different elements based on program state   
     switch (state) {
-        case states.indexOf('main menu'):  // main menu
-            break;
-        case states.indexOf('pause menu'):  // pause menu
+        case states.indexOf('pause menu'):       // pause menu
         case states.indexOf('main simulation'):  // main simulation
             drawBodyPaths();
             drawCurrentSimBodies();
@@ -643,8 +628,6 @@ function draw() {
             drawUpdateBodyPopupBox();
             if (currentlyDragging === -1) currentSimulation.handleCollisions();
             break;        
-        case states.indexOf('learn menu'):  // learn menu
-            break;
         case states.indexOf('my simulations menu'):
             drawSavedSimulationsBoxes();
             break;
@@ -656,22 +639,16 @@ function draw() {
     }
 
     // display elements of current state
-
     stroke([50,50,200]);
     strokeWeight(2);
     drawButtons();
     drawTextBoxes();
-    drawCurrentState();
-
-    
-    
+    drawCurrentState();   
 }
 
 function drawBodyPaths() { 
     currentSimulation.updatePrevBodyPositions();
     switch (drawPathValue) {
-    case 0:  // draw no body paths
-        break;
     case 1:  // draw body predicted future and previous path
         let currentTimeRate = currentSimulation.getTimeRate();
         let prevTimeRate = currentSimulation.getPrevTimeRate();
@@ -697,6 +674,8 @@ function drawBodyPaths() {
     case 2:  // draw body previous path
         drawSimulationPrevBodyPositions();
         break;
+    default: // usually case 0, draw no paths
+        break;
     }    
 }
 
@@ -709,7 +688,9 @@ function drawSimulationPrevBodyPositions() {
     // cache current simulation camera, to be passed on 
     let camera = currentSimulation.getCamera();
 
-    if (camera.getRelativeCentre() instanceof Body) {
+    // draw path relative to focussed body if body is chosen as relative centre
+    // else draw global previous paths
+    if (camera.getRelativeCentre() instanceof Body) { 
         let relativeCentrePos = camera.getRelativeCentre().getPos();
         let relativeCentreIndex = currentSimulation.getBodyIndexByName(camera.getRelativeCentre().getName());
 
@@ -721,6 +702,7 @@ function drawSimulationPrevBodyPositions() {
             }
             drawBodyRelativePrevPath(camera, i, relativeCentrePos, relativeCentreIndex);
         }
+
         return;
     }
 
@@ -736,22 +718,22 @@ function drawSimulationFutureBodyPositions() {
 
     let camera = currentSimulation.getCamera();
 
+    // draw future paths relative to focussed body if body focussed
     if (camera.getRelativeCentre() instanceof Body) {
         let relativeCentrePos = camera.getRelativeCentre().getPos();
         let relativeCentreIndex = currentSimulation.getBodyIndexByName(camera.getRelativeCentre().getName());
 
         for (let i = 0; i < currentSimulation.getBodies().length; i++) { 
+            // not draw previous path of focussed body as no previous points would be visible
             if (i == relativeCentreIndex) {
                 continue;
-                stroke([25,25,100]);
-                drawBodyFuturePath(camera, i);
-                stroke([50,50,200]);
             }
             drawBodyRelativeFuturePath(camera, i, relativeCentrePos, relativeCentreIndex);
         }
         return;
     }
-
+    
+    // draw global future paths if no body focussed
     for (let i = 0; i < currentSimulation.getBodies().length; i++) {
         drawBodyFuturePath(camera, i);
     }
@@ -885,6 +867,7 @@ function drawPublicSimulationsBoxes() {
 }
 
 function updatePopupBoxUnits() {
+    // set popup box units to current unit settings
     for (let popupBox of infoPopupBoxes) {
         popupBox.updateUnits(displayMassUnit,displaySpeedUnit,displayDistanceUnit);
     }
@@ -937,16 +920,22 @@ function drawUpdateBodyPopupBox() {
 }
 
 function drawCurrentState() {
+    // draw text describing current program state and additional relevant information in top corner of canvas
     let currentSimulationID = currentSimulation.getID();
+    
     if (!currentSimulationID) {
         currentSimulationID = "no ID";
     }
+    
     let newStateIndicatorContents = states[state];
-    if (state === 1) { newStateIndicatorContents += " - press 'esc' to pause"; }
+    
+    if      (state === 1) { newStateIndicatorContents += " - press 'esc' to pause"; }
     else if (state === 3) { newStateIndicatorContents += " - press 'esc' to unpase"; }
-    if (state === 1 || state === 3) {
+
+    if      (state === 1 || state === 3) {
         newStateIndicatorContents += " - simulation ID : " + currentSimulationID; 
     }
+    
     newStateIndicatorContents += " - username : " + currentUserName + " - user ID : " + currentUserID;
     stateIndicator.updateContents(newStateIndicatorContents);
     stateIndicator.display();
@@ -955,9 +944,11 @@ function drawCurrentState() {
 // checks if clicked on buttons in current state
 function buttonsClicked() {
     let stateButtons = buttons[state];
+    
     if (!stateButtons) {
         return;
     }
+
     // checks each button, if mouse cursor is overlapping it
     for (let button of stateButtons) {
         if (button.mouseOverlapping()) {
@@ -973,6 +964,7 @@ function buttonsClicked() {
 }
 
 function savedSimulationDescriptionBoxPressed() {
+    // called on mouse click, check if mouse overlaps description boxes, load simulation on left click, delete simulation on right click
     for (let box of savedSimulationDescriptionBoxes) {
         if (box.mouseOverlapping()) {
 
@@ -996,6 +988,8 @@ function savedSimulationDescriptionBoxPressed() {
 }
 
 function publicSimulationDescriptionBoxPressed() { 
+    // called on mouse click, check if mouse overlaps description boxes, load simulation on left click
+
     for (let box of publicSimulationDescriptionBoxes) {
         if (box.mouseOverlapping()) {
             let contents = box.getContents();
@@ -1026,6 +1020,7 @@ function setDragOffset(mX, mY) {
 }
 
 function mousePressed(event) {
+    // check for click on simulation description boxes if in corresponding program state
     switch (state) {
         case states.indexOf('my simulations menu'):
             savedSimulationDescriptionBoxPressed();
@@ -1037,8 +1032,7 @@ function mousePressed(event) {
 
     if (!event.ctrlKey) return;
 
-    // if left mousebutton pressed while holding control, attach body to cursor ////////////////////////////////////////////////LOG THIS DRAG FIX
-    if (event.button === 0)
+    // drag overlapped body if control key and left mouse button held
     for (let body of currentSimulation.getBodies()) {
         if (currentSimulation.getCamera().mouseOverlapsBody(body, [mouseX, mouseY])) {
             currentlyDragging = body;
@@ -1055,6 +1049,8 @@ function mousePressed(event) {
             setDragOffset(mouseX, mouseY);
         }
     }
+
+    // drag overlapped popup box if control and left mouse button held
     if (updateBodyPopupBox !== -1 && updateBodyPopupBox.mouseOverlapping()) {
         currentlyDragging = updateBodyPopupBox;
         setDragOffset(mouseX, mouseY);
@@ -1244,10 +1240,10 @@ function keyPressed() {
         case states.indexOf('my simulations menu'):
         case states.indexOf('public simulations menu'):
             switch (keyCode) {
-                case 37:
+                case 37: // -> left arrow key, cycle simulations right
                     loadSimulationIndex = Math.max(0, loadSimulationIndex - 1);
                     break;
-                case 39:
+                case 39: // -> right arrow key, cycle simulations left
                     loadSimulationIndex++;
                     break;
                 }
@@ -1292,6 +1288,8 @@ function drawCurrentSimBodies() {
         } else {
             let img = bodyImages[bodyImage];
             image(img, canvasPos[0], canvasPos[1], canvasDiameter, canvasDiameter);
+
+            /// draw blue circle around overlapped body
             if (camera.mouseOverlapsBody(body, [mouseX, mouseY])) {
                 noFill();
                 stroke([50,50,200])
@@ -1300,9 +1298,7 @@ function drawCurrentSimBodies() {
             }
         }
 
-        // TODO DRAW SHIP AT CORRECT ANGLE
-
-
+        // draw gold circle around dragged body
         if (currentlyDragging instanceof Body && currentlyDragging === body) {
             noFill();
             stroke (255, 255, 150);
@@ -1313,37 +1309,32 @@ function drawCurrentSimBodies() {
     }
 
     // return display modes to default for rest of program 
-    imageMode(CORNER); // ask rhys about commenting on this fixed bug 
+    imageMode(CORNER); 
     ellipseMode(CORNER);
-}
-
-function drawImageRotated(img, x, y, w, h, angle) { // TODO
-  imageMode(CENTER);
-  translate(x + w / 2, y + w / 2);
-  rotate(PI/180*angle);
-  image(img, 0, 0, w, h);
-  rotate(-PI / 180 * angle);
-  translate(-(x + w / 2), -(y + w / 2));
-  imageMode(CORNER);
 }
 
 function drawToolbar() {
     stroke([50,50,200]);
     strokeWeight(2);
     rectMode(CORNER);
+
     fill(buttonColourDefault[0], buttonColourDefault[1], buttonColourDefault[2], 100);
     rect(0, height - mainButtonHeight, width, mainButtonHeight);
+
     rectMode(CENTER);
 }
 
 function drawToolbarIcons() {
     imageMode(CENTER);
+
     for (let icon of icons[states.indexOf('main simulation')]) {
         icon.display();
     }
+
     imageMode(CORNER);
 }
 
+// populate initial past framerates at target framerate of 60
 let prevFrameRates = [];
 for (let i = 0 ; i < 20; i++) {
     prevFrameRates.push(60);
@@ -1351,21 +1342,27 @@ for (let i = 0 ; i < 20; i++) {
 
 function getAverageFrameRate() {
     let mean = 0;
+
     for (let i = 0; i < prevFrameRates.length; i++) {
         mean += prevFrameRates[i] * (1 / prevFrameRates.length);
     }
+
     return mean;
 }
 
 function drawScaleBar(c) { 
     let scaleBarCanvasWidth = 250;
+
     stroke('white');
     line(width/3, height - mainButtonHeight / 3, width/3+scaleBarCanvasWidth, height-mainButtonHeight/3);
+
     let scaleBarSimWidth = c.getSimDistance(scaleBarCanvasWidth);
+
     scaleBarTextbox.updateContents(scaleBarSimWidth.toPrecision(3) + "m");
 }
 
 function drawCurrentSimToolbar() {
+    // cache current simulation data
     let simTime = currentSimulation.getTime();
     let simTimeRate = currentSimulation.getTimeRate();
     let simPrevTimeRate = currentSimulation.getPrevTimeRate();
@@ -1381,6 +1378,7 @@ function drawCurrentSimToolbar() {
     prevFrameRates.push(frameRate());
     let averageFrameRate = getAverageFrameRate();
 
+    // display information relative to focussed body if body focussed
     if (relativeCentre instanceof Body) {
         let relativeCentrePos = relativeCentre.getPos();
         displayCameraPos[0] = displayCameraPos[0] - relativeCentrePos[0];
@@ -1390,12 +1388,14 @@ function drawCurrentSimToolbar() {
         displayCameraPos[1] = displayCameraPos[1] - relativeCentre[1];
     }
 
-    let modPos = Math.sqrt(displayCameraPos[0]**2 + displayCameraPos[1]**2);
-    let argPos = -(Math.atan2(displayCameraPos[1], displayCameraPos[0]) * 180 / Math.PI).toPrecision(3);
+    // calculate distance and angle from simulation origin or focus
+    let modPos = Math.sqrt(displayCameraPos[0]**2 + displayCameraPos[1]**2); // distance
+    let argPos = -(Math.atan2(displayCameraPos[1], displayCameraPos[0]) * 180 / Math.PI).toPrecision(3); // angle
 
     drawToolbar();
     drawToolbarIcons();
     drawScaleBar(camera);
+
     timeRateTextBox.updateContents("x"+(simTimeRate * averageFrameRate).toPrecision(3) + " (x" + (simPrevTimeRate * averageFrameRate).toPrecision(3) + ")");
     timeTextBox.updateContents(secondsToDisplayTime(simTime)); 
     camZoomTextBox.updateContents("x"+cameraZoom.toPrecision(3));
@@ -1403,6 +1403,7 @@ function drawCurrentSimToolbar() {
 }
 
 function mainSimKeyHeldHandler() {
+    // move camera based on w,a,s,d or arrow key input
     let zoomFactor = 1 / currentSimulation.getCamera().getZoom();
    
     if (keyIsDown('d') || keyIsDown(RIGHT_ARROW)) {
@@ -1434,6 +1435,7 @@ function mainSimKeyHeldHandler() {
 let zoomInFactor = 1.1;
 let zoomOutFactor = 1 / 1.1;
 let signFlipThreshold = 0.001;
+
 // q5 library function, run on any scroll wheel event where parameter event is an object containing information about the event.
 function mouseWheel(event) {
     let zoomIn = true;
@@ -1443,6 +1445,8 @@ function mouseWheel(event) {
 
     let upFactor = zoomInFactor;
     let downFactor = zoomOutFactor;
+
+    // scale zoom factors up or down if control or shift held to zoom faster or slower
     if (keyIsDown('control')) {
         upFactor = 1.01;
         downFactor = 1/1.01;
@@ -1452,58 +1456,61 @@ function mouseWheel(event) {
     }
 
 
-    switch (state) {
-        case 1:  // main simulation
-            let currentTimeRate = currentSimulation.getTimeRate();
-            if (timeRateTextBox.mouseOverlapping()) { 
-                if (currentTimeRate === 0) {
-                    if (keyIsDown('control'))  {
-                        if (zoomIn) {
-                            currentSimulation.setTimeRate(-1 * signFlipThreshold);
-                        } else {
-                            currentSimulation.setTimeRate(signFlipThreshold);
-                        }
+    
+    if (state === states.indexOf('main simulation')) {
+        let currentTimeRate = currentSimulation.getTimeRate();
+
+        // update time rate if mouse overlapping time rate text box according to scroll direction, zoom factor and current time rate
+        if (timeRateTextBox.mouseOverlapping()) { 
+            if (currentTimeRate === 0) {
+                if (keyIsDown('control'))  {
+                    if (zoomIn) {
+                        currentSimulation.setTimeRate(-1 * signFlipThreshold);
+                    } else {
+                        currentSimulation.setTimeRate(signFlipThreshold);
+                    }
+                    return;
+                }
+
+                if (zoomIn) {
+                    currentSimulation.setPrevTimeRate(downFactor * currentSimulation.getPrevTimeRate());
+                } else {
+                    currentSimulation.setPrevTimeRate(upFactor * currentSimulation.getPrevTimeRate());
+                }
+                return
+            }
+            if (currentTimeRate > 0) { 
+                if (zoomIn) { // scroll down 
+                    if (currentTimeRate < signFlipThreshold) {
+                        currentSimulation.setTimeRate(-1 * currentTimeRate);
+                        return;
+                    }
+                    currentSimulation.updateTimeRate(downFactor);
+                } else { // scroll up
+                    currentSimulation.updateTimeRate(upFactor);
+                }
+                return;
+            } else {
+                if (zoomIn) { // scroll down 
+                    currentSimulation.updateTimeRate(upFactor);
+                } else { // scroll up
+                    if (currentTimeRate > -1 * signFlipThreshold) {
+                        currentSimulation.setTimeRate(-1 * currentTimeRate);
                         return;
                     }
 
-
-                    if (zoomIn) {
-                        currentSimulation.setPrevTimeRate(downFactor * currentSimulation.getPrevTimeRate());
-                    } else {
-                        currentSimulation.setPrevTimeRate(upFactor * currentSimulation.getPrevTimeRate());
-                    }
-                    return
+                    currentSimulation.updateTimeRate(downFactor);
                 }
-                if (currentTimeRate > 0) { 
-                    if (zoomIn) { // scroll down 
-                        if (currentTimeRate < signFlipThreshold) {
-                            currentSimulation.setTimeRate(-1 * currentTimeRate);
-                            return;
-                        }
-                        currentSimulation.updateTimeRate(downFactor);
-                    } else { // scroll up
-                        currentSimulation.updateTimeRate(upFactor);
-                    }
-                    break;
-                } else {
-                    if (zoomIn) { // scroll down 
-                        currentSimulation.updateTimeRate(upFactor);
-                    } else { // scroll up
-                        if (currentTimeRate > -1 * signFlipThreshold) {
-                            currentSimulation.setTimeRate(-1 * currentTimeRate);
-                            return;
-                        }
-                        currentSimulation.updateTimeRate(downFactor);
-                    }
-                    break;
-                }
-            } 
-            if (zoomIn) { // scroll down 
-                currentSimulation.getCamera().adjustZoom(downFactor);
-            } else { // scroll up
-                currentSimulation.getCamera().adjustZoom(upFactor);
+                return;
             }
-            break;
+        } 
+
+        if (zoomIn) { // scroll down 
+            currentSimulation.getCamera().adjustZoom(downFactor);
+        } else { // scroll up
+            currentSimulation.getCamera().adjustZoom(upFactor);
+        }
+        return;
     }
 }
 
@@ -1512,10 +1519,11 @@ let secondsPerMinute = 60;
 let secondsPerHour = 60 * secondsPerMinute;
 let secondsPerDay = 24 * secondsPerHour;
 let secondsPerYear = 365.25 * secondsPerDay;
+
+// calculate text to populate simulation time text box
 function secondsToDisplayTime(seconds) {
     let outputText = "";
     let years = Math.floor(seconds / secondsPerYear);
-    //if (years == 2026) currentSimulation.setTimeRate(0);
     seconds -= years * secondsPerYear;
     let days = Math.floor(seconds / secondsPerDay);
     seconds -= days * secondsPerDay;
@@ -1523,7 +1531,9 @@ function secondsToDisplayTime(seconds) {
     seconds -= hours * secondsPerHour;
     let minutes = Math.floor(seconds / secondsPerMinute);
     seconds -= minutes * secondsPerMinute;
+
     outputText += years.toString().padStart(3,'0') + ":" + days.toString().padStart(3,'0') + ":" + hours.toString().padStart(2,'0') + ":" + minutes.toString().padStart(2,'0') + ":" + Math.round(seconds).toString().padStart(2,'0');
+    
     return outputText;
 }
 

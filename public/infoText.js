@@ -76,10 +76,7 @@ Miles per hour (mph) = 1609.34 meters per hour
 Gravitational Constant:
 G = 6.67430 × 10^-11 m^3·kg^-1·s^-2
 `
-//const SIUnitsString = `SI Units
-//----------
-//SI is a french abbreviation for Système international d'unités, in english an international standard of units.
-//...`;
+
 const simulationTutorialString = `Controls 
 ----------------------------------------------------------------------------------------------------------------------
 Simulation Controls

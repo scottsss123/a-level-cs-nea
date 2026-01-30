@@ -26,16 +26,7 @@ function connected(socket) {
     socket.join(""+socket.id);    
     console.log(socket.id + " has connected");
 
-    // enable client to call insertNewUser() on server
-    // log usernames and/or password hashes to serverside terminal
-    //socket.on('logUsernames', () => { logUsernames() });
-    //socket.on('logPasswordHashes', () => { logPasswordHashes() });
-    //socket.on('logUsers', () => {logUsers()});
-    //socket.on('logdata', (data) => {
-    //    console.log(data);
-    //})
-    //socket.on('loglastuserid', () => { loglastuserid(); })
-
+    // define server functions callable by clients
     socket.on('signupUser', (data) => { signupUser(data) });
     socket.on('loginUser', (data) => { loginUser(data) });  
     socket.on('insertSimulation', (data) => { insertSimulation(data); });
@@ -119,7 +110,6 @@ function insertSimulation(data) { // UserID, SimulationJSON, IsPublic
     let isPublic = data.isPublic;
 
     let sql = "INSERT INTO Simulations (UserID, Simulation, IsPublic) VALUES ('" + userID + "','"+simulationJSON+"','"+isPublic+"');";
-    //console.log("sql:", sql);
 
     db.all(sql, (err) => {
         if (err) {
@@ -139,6 +129,7 @@ async function signupUser(data) {
 
     let users = await getUsers();
 
+    // check for inputted data validity
     let usernameExists = false;
     for (let i = 0; i < users.length; i++) {
         if (users[i].Username === username) {
@@ -146,6 +137,7 @@ async function signupUser(data) {
         }
     }
 
+    // report invalidity
     if (usernameExists) {
         io.to(data.id).emit('alert', 'Username already exists, try a logging in or a different username');
         return;
@@ -174,10 +166,10 @@ async function loginUser(data) {
     let users = await getUsers();
     let userID;
     
+    // check for inputted data validity
     let usernameExists = false;
     let userPasswordHash = "";
     for (let i = 0; i < users.length; i++) {
-        //console.log(users[i]);
         if (users[i].Username === username) {
             usernameExists = true;
             userID = users[i].UserID;
@@ -185,6 +177,7 @@ async function loginUser(data) {
         }
     }
 
+    // report invalidity
     if (!usernameExists) {
         io.to(data.id).emit("alert", "Username does not exist, try signing up to create new user");
         return;
@@ -195,6 +188,7 @@ async function loginUser(data) {
         return;
     }
 
+    // login and report validity
     io.to(data.id).emit("alert", "Log in successful\nCurrent user: " + username);
     io.to(data.id).emit("setUser", { userID : userID, username: username });
 }
@@ -232,6 +226,7 @@ async function saveSettings(data) { // data = { userID: int, volume: 0/1, length
 
     let settingsExists = false;
 
+    // find if this is first time saving settings
     let settings = await getSettings();
     for (let i = 0; i < settings.length; i++) {
         if (settings[i].UserID === userID) {
@@ -239,8 +234,8 @@ async function saveSettings(data) { // data = { userID: int, volume: 0/1, length
         }
     }
 
+    // if first time saving settings, insert new settings record
     if (!settingsExists) {
-
         let sql = "INSERT INTO Settings (UserID, Volume, LengthUnit, MassUnit, SpeedUnit) VALUES (" + userID + ", " + volume + ", '" + lengthUnit + "', '" + massUnit+"', '" + speedUnit + "');";
         console.log("sql:", sql);
         // execut sql and log any sql errors
@@ -256,6 +251,7 @@ async function saveSettings(data) { // data = { userID: int, volume: 0/1, length
         return;
     }
 
+    // if not first time saving settings, update existing settings record
     let sql = "UPDATE Settings SET Volume = " + volume + ", LengthUnit = '" + lengthUnit + "', MassUnit = '" + massUnit + "', SpeedUnit = '" + speedUnit + "' WHERE UserID = " + userID + ";";
     console.log(sql);
     // execut sql and log any sql errors
@@ -270,7 +266,10 @@ async function saveSettings(data) { // data = { userID: int, volume: 0/1, length
 }
 
 async function loadSettings(data) { 
+    // retrieve settings
     let settings = await getSettings();
+
+    // load settings and report validity
     for (let i = 0; i < settings.length; i++) {
         if (settings[i].UserID === data.userID) {
             io.to(data.id).emit('loadSettings', { volume: settings[i].Volume, lengthUnit: settings[i].LengthUnit, massUnit: settings[i].MassUnit, speedUnit: settings[i].SpeedUnit });
@@ -278,14 +277,13 @@ async function loadSettings(data) {
             return;
         }
     }
+
+    // report invalidity
     io.emit('alert', 'settings failed to load, try logging in');
 }
 
 function getSimulationMetaDatas() {
-    //let sql = "SELECT UserID, SimulationID, IsPublic, Name, Description FROM Simulations;";
-    // console.log("sql:", sql);
     let sql = "SELECT Simulations.UserID, Simulations.SimulationID, Simulations.IsPublic, Simulations.Name, Simulations.Description, Users.Username FROM Simulations, Users;";
-
 
     return new Promise((resolve) => {
         db.all(sql, (err,rows) => {
@@ -316,10 +314,8 @@ async function saveSimulation(data) {
             currentSimulationMetaData = simulationMetaDatas[i];
         }
     }
-    if (!currentSimulationMetaData) {
-        console.log('uh oh :('); // fix this before documenting
-    }
 
+    // set missing values to saved values
     if (!isPublic) {
         isPublic = currentSimulationMetaData.IsPublic
     } else if (isPublic !== 'y') {
@@ -335,7 +331,6 @@ async function saveSimulation(data) {
     }
 
     // save simulation
-
     let sql = "UPDATE Simulations SET UserID = " + userID + ", Simulation = '" + simulationString + "', IsPublic = " + isPublic + ", Name = '" + name + "', Description = '" + description + "' WHERE SimulationID = " + simulationID + ";";
     console.log(sql);
     db.all(sql, (err) => {
@@ -387,8 +382,8 @@ async function saveAsSimulation(data) { // data = { userID: int , simulationStri
     let description = data.description;
 
     let sql = "INSERT INTO Simulations (UserID, Simulation, IsPublic, Name, Description) VALUES (" + userID + ", '" + simulationString + "', " + isPublic + ", '" + name+"', '" + description + "');";
-    //console.log("sql:", sql);
 
+    // sav simulation and report validity or report invalidity
     db.all(sql, (err) => {
         if (err) {
             console.log(err);
@@ -419,16 +414,21 @@ function getSimulationByID(ID) {
 }
 
 async function setCurrentSimulationByID(data) {
+    // retrieve simulation data
     let simulationData = await getSimulationByID(data.simID);
     let outData = simulationData.Simulation;
+
+    // return data to client
     io.to(data.id).emit('setCurrentSimulation', outData);
 }
 
 //  send user's simulations' meta datas to the client
 async function updateSavedSimulationDescriptionBoxes(data) {
+    // retrieve all meta datas
     let simulationMetaDatas = await getSimulationMetaDatas();
     let userSimulationMetaDatas = [];
 
+    // select only user's simulations' meta datas
     for (let simulationMetaData of simulationMetaDatas) {
         if (simulationMetaData.UserID === data.userID) {
             userSimulationMetaDatas.push(simulationMetaData);
@@ -437,15 +437,17 @@ async function updateSavedSimulationDescriptionBoxes(data) {
 
     console.log('meta datas: ' , userSimulationMetaDatas);
 
-
+    // return users' meta datas to user
     io.to(data.id).emit('updateSavedSimulationDescriptionBoxes', userSimulationMetaDatas);
 }
 
 //  send public simulations' meta datas to the client
 async function updatePublicSimulationDescriptionBoxes() {
+    // retrieve all meta datas
     let simulationMetaDatas = await getSimulationMetaDatas();
     let publicSimulationMetaDatas = [];
 
+    // select only public simulations' meta datas
     for (let simulationMetaData of simulationMetaDatas) {
         if (simulationMetaData.IsPublic === 1) {
             publicSimulationMetaDatas.push(simulationMetaData);
@@ -454,13 +456,15 @@ async function updatePublicSimulationDescriptionBoxes() {
 
     console.log('meta datas: ', publicSimulationMetaDatas);
 
+    // return public simulations' meta datas to client
     io.emit('updatePublicSimulationDescriptionBoxes', publicSimulationMetaDatas);
 }
 
 async function loadSimulationByID(data) {
-    
+    // retrieve simulation data
     let simulationData = await getSimulationByID(data.simID);
     
+    // return simulation data to client
     io.to(data.id).emit('setCurrentSimulation', simulationData.Simulation);
     
 }
@@ -469,9 +473,11 @@ async function deleteSimulationByID(data) {
     console.log('trying to delete',data.simulationID);
 
     let sql = "DELETE FROM Simulations WHERE SimulationID = " + data.simulationID + ";";
+    // delete simulation and report validity or report invalidity
     db.all(sql, (err) => {
         if (err) {
             console.log(err);
+            io.to(data.id).emit('alert', 'failed to delete simulation id: ' + data.simulationID);
         } else {
             console.log('simulation id: ' + data.simulationID + " deleted");
             io.to(data.id).emit('alert', 'simulation id: ' + data.simulationID + ' deleted');

@@ -10,7 +10,7 @@ class Button extends Box {
 
     constructor(inX, inY, inWidth, inHeight, inText, inStateChange) {
         
-        // box constructor
+        // box's (parent class') constructor
         super(inX, inY, inWidth, inHeight, buttonColourDefault);
         // additional variable assignment
         this.#colourDefault = this.getColour();
@@ -19,7 +19,7 @@ class Button extends Box {
         this.#txt = inText;
     }   
 
-    // display same as box also with centered text
+    // display same as box with additional centered text
     display() {
         stroke([50,50,200]);
         super.display();
@@ -30,7 +30,7 @@ class Button extends Box {
     }
 
     mouseOverlapping() {
-        // true/false, mouse in button bounds
+        // true or false, mouse in button bounds
         let overlapping = super.mouseOverlapping()
         if (overlapping) {
             this.setColour(this.#colourHover);
@@ -53,7 +53,7 @@ class Button extends Box {
         this.#txt = inTxt;
     }
 
-    // to be overwritten in non-state-changing buttons
+    // overwritten in non-state-changing buttons
     onPress() {
         return;
     }

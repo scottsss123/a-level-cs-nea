@@ -1,3 +1,5 @@
+// unit names and conversions
+// global but mostly needed within the bodyInfoPopupBox class
 const massUnits = {
     "kg":1,
     "earths":1/5.97219e24,
@@ -36,7 +38,7 @@ class BodyInfoPopupBox extends TextBox {
 
     display() {
 
-         // draws line from text box to linked body 
+        // draw line from text box to linked body 
         let pos = this.getPos();
         let bodyCanvasPos = this.#linkedCamera.getCanvasPosition(this.#linkedBody);
         
@@ -83,7 +85,7 @@ class BodyInfoPopupBox extends TextBox {
         }
 
         let bodyVelocityMagnitude = (Math.sqrt((bodyVelocity[0])**2 + (bodyVelocity[1])**2) * speedUnits[this.#displaySpeedUnit]).toPrecision(3);
-        // calculate angle of body's velocity currently standard angle, could change to bearing 
+        // calculate angle of body's velocity currently standard angle 
         let bodyVelocityDirection = -(Math.atan2(bodyVelocity[1], bodyVelocity[0]) * 180 / Math.PI).toPrecision(3);
 
         let modPos = Math.sqrt(bodyPosition[0]**2 + bodyPosition[1]**2);

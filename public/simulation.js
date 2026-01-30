@@ -6,7 +6,7 @@ class Simulation {
     #prevTimeRate; // float
     #G; // gravitational constant float
     #focus; // bool / string
-    #id;
+    #id; // int
 
     #prevBodyPositions; 
     #prevPathInterval;
@@ -119,7 +119,7 @@ class Simulation {
         return this.#focus;
     }
 
-    updateBodyVelocities() { //TODO RK4
+    updateBodyVelocities() {
         // for each pair of bodies, bodyi, bodyj
         for (let i = 0; i < this.#bodies.length; i++) {
             for (let j = i + 1; j < this.#bodies.length; j++) {
@@ -141,9 +141,8 @@ class Simulation {
                 // calculate unit vector in direction of bodyi to bodyj, unitVec
                 let dir = [pos2[0] - pos1[0], pos2[1] - pos1[1]];
                 let modDir = Math.sqrt((dir[0] ** 2) + (dir[1] ** 2));
-                // TODO LOG ROBUSTNESS CHECK OF same pos
                 let unitVec = [dir[0] / modDir, dir[1] / modDir];
-                // calculate magnitude of force, could be extracted to function
+                // calculate magnitude of force, could be extracted to function, F=GM1M2/r^2
                 let forceMag = (this.#G * mass1 * mass2) / (modDir ** 2);
 
                 let accelerationMag1 = forceMag / mass1; // a = F / m 
@@ -199,7 +198,6 @@ class Simulation {
         }
         for (let i = 0; i < this.#bodies.length; i++) {
             // add new body position to previous position array and remove oldest position if over 999 elements
-
             let pos = this.#bodies[i].getPos();
 
             if (this.#prevBodyPositions[i].length > 999) {
@@ -236,7 +234,7 @@ class Simulation {
                 let pos = cloneSim.getBodies()[j].getPos();
                 this.#futureBodyPositions[j][i] = [pos[0], pos[1]];
             }
-            cloneSim.simpleStep();
+            cloneSim.step();
         }
 
     }
@@ -252,10 +250,12 @@ class Simulation {
     handleCollisions() { 
         let bodies = this.#bodies;
         let destroyedIndices = [];
+        // for each pair of non-destroyed bodies, bodyi & bodyj
         for (let i = 0; i < bodies.length; i++) {
             if (destroyedIndices.includes(i)) continue;
             for (let j = i + 1; j < bodies.length; j++) {
                 if (destroyedIndices.includes(j)) continue;
+
                 let body1 = bodies[i];
                 let body2 = bodies[j];
 
@@ -266,6 +266,8 @@ class Simulation {
                     let survivingBody;
                     let dyingBody;
                     let dyingBodyIndex;
+
+                    // more massive body survives
                     if (mass1 > mass2) {
                         survivingBody = body1;
                         dyingBody = body2;
@@ -277,7 +279,7 @@ class Simulation {
                     }
                     destroyedIndices.push(dyingBodyIndex);
 
-                    // add less massive body's momentum to more massive body
+                    // add less massive body's mass and momentum to more massive body
                     let dyingMass = dyingBody.getMass();
                     let dyingVel = dyingBody.getVel();
                     let dyingMomentum = [dyingVel[0] * dyingMass, dyingVel[1] * dyingMass];
@@ -294,7 +296,7 @@ class Simulation {
 
                     survivingBody.setVel(finalVel);
 
-                    // remove less massive body
+                    // remove less massive body from simulation
                     
                     this.#prevBodyPositions.splice(dyingBodyIndex, 1)
                     this.#bodies.splice(dyingBodyIndex, 1);                     
@@ -309,16 +311,7 @@ class Simulation {
         this.updateBodyVelocities();
         this.updateBodyPositions();           
 
-        //this.updatePrevBodyPositions();
-        //this.updateFutureBodyPositions();
         return;
-    }
-
-    simpleStep() {
-        this.#time += this.#timeRate;
-        
-        this.updateBodyVelocities();
-        this.updateBodyPositions(); 
     }
 
     setID(id) {
@@ -343,7 +336,6 @@ class Simulation {
         }
 
         let data = {
-            // incorporate new relative centre
             bodies: bodyArr, 
             camera: this.#camera.getCameraData(),
             time: this.#time,
@@ -365,12 +357,14 @@ class Simulation {
             let body = data.bodies[i]
             this.#bodies[i] = new Body(body.name, body.pos, body.vel, body.mass, body.diameter, body.image, body.colour );
         }
+        
         this.#camera.setData(data.camera);
         if (!data.focus) {
             this.#focus = false;
         } else {
             this.#focus = this.getBodyByName(data.focus.name);
         }
+
         this.#prevTimeRate = data.prevTimeRate
         this.#time = data.time;
         this.#timeRate = data.timeRate;

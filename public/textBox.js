@@ -43,8 +43,6 @@ class TextBox extends Box {
         noStroke();
 
         // display text, wrap text limited to text box width and height
-        //let pos = this.getPos(); /////////////////////////////fix here
-        //this.#textPos = [pos[0] + this.#textOffsetX, pos[1] + this.#textOffsetY];
         text(this.#contents, this.#textPos[0], this.#textPos[1], (this.getWidth() - 2 * this.#textOffsetX) / textWidth('a'), (this.getHeight() - 2 * this.#textOffsetY) / textLeading());
 
         // return to normal alignemnet
