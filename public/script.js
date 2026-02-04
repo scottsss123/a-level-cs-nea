@@ -1167,6 +1167,7 @@ function mouseReleased(event) {
     switchSound.stop();
     switchSound.play();
 }
+
 // q5 library function, run once when any key pressed
 function keyPressed() {
         switch (state) {

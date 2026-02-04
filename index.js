@@ -283,13 +283,14 @@ async function loadSettings(data) {
 }
 
 function getSimulationMetaDatas() {
-    let sql = "SELECT Simulations.UserID, Simulations.SimulationID, Simulations.IsPublic, Simulations.Name, Simulations.Description, Users.Username FROM Simulations, Users;";
+    let sql = "SELECT Simulations.UserID, Simulations.SimulationID, Simulations.IsPublic, Simulations.Name, Simulations.Description, Users.Username FROM Simulations INNER JOIN Users ON Simulations.UserID=Users.UserID;";
 
     return new Promise((resolve) => {
         db.all(sql, (err,rows) => {
             if (err) {
                 console.log(err);
             } else {
+                console.log(rows);
                 resolve(rows);
             }
         })
